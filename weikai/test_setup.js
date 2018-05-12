@@ -10,7 +10,7 @@ function initClient(identifier, keyId){
   ret.identifier = identifier;
   var identityKeyPair;
 
-  KeyHelper.generateIdentityKeyPair().then(function(identityKP) { 
+  return KeyHelper.generateIdentityKeyPair().then(function(identityKP) { 
     ret.identityKeyPair = identityKP;
     // console.log(ret.identityKeyPair);
     store.putLocalRegistrationId(registrationId);
@@ -26,7 +26,8 @@ function initClient(identifier, keyId){
     keyPair = signedPreKey.keyPair;
     keyPair.signature = signedPreKey.signature;
     store.storeSignedPreKey(signedPreKey.keyId, keyPair);
+    
+    ret.store = store;
+    return ret;
   });
-  ret.store = store;
-  return ret;
 }

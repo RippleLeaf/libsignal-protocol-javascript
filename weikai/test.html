@@ -24,29 +24,62 @@
 
 // var store = new SignalProtocolStore();
 
-var c = initClient("CS.6431", 6431);
-var c2 = initClient("May.12", 2018);
-var address = new libsignal.SignalProtocolAddress("May.12",2018);
-var sessionBuilder = new libsignal.SessionBuilder(c.store, address);
+Promise.all(
+    [initClient("CS.6431", 6431), initClient("May.12", 2018)]).
+  then(function(users){
+    var alice = users[0];
+    var bob = users[1];
+    var address = new libsignal.SignalProtocolAddress("May.12", 2018);
+    var sessionBuilder = new libsignal.SessionBuilder(alice.store, address);
+    var promise = sessionBuilder.processPreKey({
+        registrationId: bob.identifier,
+        identityKey: bob.store.store.identityKeyMay.pubKey,
+        signedPreKey: {
+            keyId: bob.keyId,
+            publicKey: bob.store.store["25519KeysignedKey2018"].pubKey,
+            signature: bob.store.store["25519KeysignedKey2018"].signature,
+        },
+        preKey:{
+            keyId: bob.keyId,
+            publicKey: bob.store.store["25519KeypreKey2018"].pubKey,
+        }
+    });
+    console.log(alice);
+    console.log(bob);
+    
+    promise.then(function onsuccess() {
+        var plaintext = "Hello world";
+        var sessionCipher = new libsignal.SessionCipher(alice.store, address);
+        return sessionCipher.encrypt(plaintext);
+    }).then(function(ciphertext) {
+        console.log(ciphertext.type);
+        console.log(ciphertext.body);
+    });
+  });
 
+
+var alice = initClient("CS.6431", 6431)
+var bob = initClient("May.12", 2018);
+
+var address = new libsignal.SignalProtocolAddress("May.12",2018);
+var sessionBuilder = new libsignal.SessionBuilder(alice.store, address);
 var promise = sessionBuilder.processPreKey({
-    registrationId:c2.identifier,
-    identityKey: c2.store.store.identityKeyMay.pubKey,
+    registrationId: bob.identifier,
+    identityKey: bob.store.store.identityKeyMay.pubKey,
     signedPreKey: {
-        keyId: c2.keyId,
-        publicKey: c2.store.store["25519KeysignedKey2018"].pubKey,
-        signature: c2.store.store["25519KeysignedKey2018"].signature,
+        keyId: bob.keyId,
+        publicKey: bob.store.store["25519KeysignedKey2018"].pubKey,
+        signature: bob.store.store["25519KeysignedKey2018"].signature,
     },
     preKey:{
-        keyId: c2.keyId,
-        publicKey: c2.store.store["25519KeypreKey2018"].pubKey,
+        keyId: bob.keyId,
+        publicKey: bob.store.store["25519KeypreKey2018"].pubKey,
     }
 });
 
-
 promise.then(function onsuccess() {
     var plaintext = "Hello world";
-    var sessionCipher = new libsignal.SessionCipher(c.store, address);
+    var sessionCipher = new libsignal.SessionCipher(alice.store, address);
     return sessionCipher.encrypt(plaintext);
 }).then(function(ciphertext) {
     console.log(ciphertext.type);
