@@ -13,6 +13,7 @@ function initClient(identifier, keyId){
   KeyHelper.generateIdentityKeyPair().then(function(identityKP) { 
     ret.identityKeyPair = identityKP;
     // console.log(ret.identityKeyPair);
+    store.putLocalRegistrationId(registrationId);
     store.saveIdentity(identifier, identityKP);
     store.putIdentityKeyPair(identityKP);
   }).then(function(){

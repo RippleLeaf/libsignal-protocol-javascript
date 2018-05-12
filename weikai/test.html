@@ -26,10 +26,8 @@
 
 var c = initClient("CS.6431", 6431);
 var c2 = initClient("May.12", 2018);
-
 var address = new libsignal.SignalProtocolAddress("May.12",2018);
 var sessionBuilder = new libsignal.SessionBuilder(c.store, address);
-
 
 var promise = sessionBuilder.processPreKey({
     registrationId:c2.identifier,
@@ -45,17 +43,15 @@ var promise = sessionBuilder.processPreKey({
     }
 });
 
-promise.then(function onsuccess() {
-  var plaintext = "Hello world";
-  var sessionCipher = new libsignal.SessionCipher(c.store, address);
-  sessionCipher.encrypt(plaintext).then(function(ciphertext) {
-      console.log(ciphertext.type);
-      console.log(ciphertext.body);
-      // ciphertext -> { type: <Number>, body: <string> }
-      // handle(ciphertext.type, ciphertext.body);
-  });
-});
 
+promise.then(function onsuccess() {
+    var plaintext = "Hello world";
+    var sessionCipher = new libsignal.SessionCipher(c.store, address);
+    return sessionCipher.encrypt(plaintext);
+}).then(function(ciphertext) {
+    console.log(ciphertext.type);
+    console.log(ciphertext.body);
+});
 </script>
 <!-- <script type="text/javascript">
 </script> -->
