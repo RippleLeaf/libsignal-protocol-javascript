@@ -36122,6 +36122,11 @@ SessionCipher.prototype = {
 
               preKeyMsg.message = message;
               var result = String.fromCharCode((3 << 4) | 3) + util.toString(preKeyMsg.encode());
+              // var result = util.toString(preKeyMsg.encode());
+              // var test = dcodeIO.ByteBuffer.wrap().toArrayBuffer().readUint8();
+              var buffer = dcodeIO.ByteBuffer.wrap(util.toString(preKeyMsg.encode()), "binary");
+              // var version = buffer.readUint8();
+              console.log("encrypt:test encode", Internal.protobuf.PreKeyWhisperMessage.decode(buffer));
               return {
                   type           : 3,
                   body           : result,
@@ -36194,6 +36199,7 @@ SessionCipher.prototype = {
       }.bind(this));
   },
   decryptPreKeyWhisperMessage: function(buffer, encoding) {
+      console.log(buffer);
       buffer = dcodeIO.ByteBuffer.wrap(buffer, encoding);
       var version = buffer.readUint8();
       if ((version & 0xF) > 3 || (version >> 4) < 3) {  // min version > 3 or max version < 3
@@ -36203,6 +36209,9 @@ SessionCipher.prototype = {
           var address = this.remoteAddress.toString();
           return this.getRecord(address).then(function(record) {
               var preKeyProto = Internal.protobuf.PreKeyWhisperMessage.decode(buffer);
+              // console.log(buffer);
+              // console.log(preKeyProto);
+
               if (!record) {
                   if (preKeyProto.registrationId === undefined) {
                       throw new Error("No registrationId");

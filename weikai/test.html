@@ -46,14 +46,24 @@ Promise.all(
     });
     console.log(alice);
     console.log(bob);
-    
+    // var = ct;
+
     promise.then(function onsuccess() {
         var plaintext = "Hello world";
         var sessionCipher = new libsignal.SessionCipher(alice.store, address);
         return sessionCipher.encrypt(plaintext);
     }).then(function(ciphertext) {
-        console.log(ciphertext.type);
-        console.log(ciphertext.body);
+        // ct = ciphertext;
+        // Bob receiving
+        console.log(ciphertext);
+
+        var address = new libsignal.SignalProtocolAddress("CS.6431", 6431);
+        var sessionCipher = new libsignal.SessionCipher(bob.store, address);
+        sessionCipher.decryptPreKeyWhisperMessage(ciphertext.body, "binary").then(function(plaintext) {
+          console.log(plaintext);
+        }).catch(function(error) {
+          console.log(error);
+        });
     });
   });
 
