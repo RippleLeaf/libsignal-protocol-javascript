@@ -1,21 +1,29 @@
+<script type="text/javascript" src="InMemorySignalProtocolStore.js"></script>
+<script type="text/javascript" src="test_setup.js"></script>
 <script type="text/javascript" src="../dist/libsignal-protocol.js">
 
-var keyId = 6431;
-var KeyHelper = libsignal.KeyHelper;
-var registrationId = KeyHelper.generateRegistrationId();
+// function initClient(keyId){
+//   // var keyId = 6431;
+//   var store = new SignalProtocolStore();
+//   var KeyHelper = libsignal.KeyHelper;
+//   var registrationId = KeyHelper.generateRegistrationId();
+//   var identityKeyPair;
 
-var identityKeyPair;
-KeyHelper.generateIdentityKeyPair().then(function(identityKP) { 
-    identityKeyPair = identityKP;
-});
-var preKey;
-KeyHelper.generatePreKey(keyId).then(function(preK) {
-	preKey = preK;
-});
-var signedPreKey;
-KeyHelper.generateSignedPreKey(identityKeyPair, keyId).then(function(signedPreK){
-    signedPreKey = signedPreK;
-});
+//   KeyHelper.generateIdentityKeyPair().then(function(identityKP) { 
+//     store.saveIdentity()
+//   });
+//   var preKey;
+//   KeyHelper.generatePreKey(keyId).then(function(preK) {
+//     preKey = preK;
+//   });
+//   var signedPreKey;
+//   KeyHelper.generateSignedPreKey(identityKeyPair, keyId).then(function(signedPreK){
+//       signedPreKey = signedPreK;
+//   });
+// }
+
+// var store = new SignalProtocolStore();
+
 
 </script>
 <!-- <script type="text/javascript">
