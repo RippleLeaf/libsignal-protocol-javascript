@@ -12,6 +12,11 @@ SignalProtocolStore.prototype = {
   getIdentityKeyPair: function() {
     return Promise.resolve(this.get('identityKey'));
   },
+
+  putIdentityKeyPair: function(identityKeyPair) {
+    return Promise.resolve(this.put('identityKey', identityKeyPair));
+  },
+
   getLocalRegistrationId: function() {
     return Promise.resolve(this.get('registrationId'));
   },

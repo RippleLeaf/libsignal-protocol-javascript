@@ -13,7 +13,8 @@ function initClient(identifier, keyId){
   KeyHelper.generateIdentityKeyPair().then(function(identityKP) { 
     ret.identityKeyPair = identityKP;
     // console.log(ret.identityKeyPair);
-    store.saveIdentity(identifier, identityKP.pubKey);
+    store.saveIdentity(identifier, identityKP);
+    store.putIdentityKeyPair(identityKP);
   }).then(function(){
     return KeyHelper.generatePreKey(keyId);
   }).then(function(preKey){
@@ -21,7 +22,9 @@ function initClient(identifier, keyId){
   }).then(function(){
     return KeyHelper.generateSignedPreKey(ret.identityKeyPair, keyId);
   }).then(function(signedPreKey){
-    store.storeSignedPreKey(signedPreKey.keyId, signedPreKey.keyPair);
+    keyPair = signedPreKey.keyPair;
+    keyPair.signature = signedPreKey.signature;
+    store.storeSignedPreKey(signedPreKey.keyId, keyPair);
   });
   ret.store = store;
   return ret;
