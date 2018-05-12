@@ -1,1 +1,22 @@
-<script src="libsignal-protocol-javascript/dist/libsignal-protocol.js"></script>
+<script type="text/javascript" src="../dist/libsignal-protocol.js">
+
+var keyId = 6431;
+var KeyHelper = libsignal.KeyHelper;
+var registrationId = KeyHelper.generateRegistrationId();
+
+var identityKeyPair;
+KeyHelper.generateIdentityKeyPair().then(function(identityKP) { 
+    identityKeyPair = identityKP;
+});
+var preKey;
+KeyHelper.generatePreKey(keyId).then(function(preK) {
+	preKey = preK;
+});
+var signedPreKey;
+KeyHelper.generateSignedPreKey(identityKeyPair, keyId).then(function(signedPreK){
+    signedPreKey = signedPreK;
+});
+
+</script>
+<!-- <script type="text/javascript">
+</script> -->
