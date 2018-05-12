@@ -1,7 +1,7 @@
 
 function initClient(identifier, keyId){
-  var identifier = "CS.6431";
-  var keyId = 6431;
+  // var identifier = "CS.6431";
+  // var keyId = 6431;
   var store = new SignalProtocolStore();
   var KeyHelper = libsignal.KeyHelper;
   var registrationId = KeyHelper.generateRegistrationId();
