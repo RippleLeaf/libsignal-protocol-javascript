@@ -78,7 +78,62 @@ function doDecrypt(sender, rcver, ciphertext) {
   return rcver.sessionCipher.decryptWhisperMessage(ciphertext.body, "binary");
 }
 
+angular.module('messengerApp', [])
+  .controller('MsgController', function() {
+    var messenger = this;
+    messenger.todos = [];
+      // {text:'learn AngularJS', done:true},
+      // {text:'build an AngularJS app', done:false}];
 
+    messenger.send = function(sender) {
+      var textAlign = 'left';
+      var textbox = messenger.aliceMsg;
+      if(sender == 'Bob'){
+        textAlign = 'right';
+        textbox = messenger.bobMsg;
+      }
+      console.log(messenger.sender);
+      messenger.todos.push({
+          text: textbox,
+          sender: sender, 
+          align: textAlign});
+      if(sender == 'Alice'){
+        messenger.aliceMsg = '';
+      }
+      else{
+        messenger.bobMsg = '';
+      }
+    };
+
+    // messenger.remaining = function() {
+    //   var count = 0;
+    //   angular.forEach(messenger.todos, function(todo) {
+    //     count += todo.done ? 0 : 1;
+    //   });
+    //   return count;
+    // };
+
+    // messenger.archive = function() {
+    //   var oldTodos = messenger.todos;
+    //   messenger.todos = [];
+    //   angular.forEach(oldTodos, function(todo) {
+    //     if (!todo.done) messenger.todos.push(todo);
+    //   });
+    // };
+
+
+    messenger.isString = function(s) {
+        return angular.isString(s);
+    };
+
+  });
+
+
+/*
+Copyright 2018 Google Inc. All Rights Reserved.
+Use of this source code is governed by an MIT-style license that
+can be found in the LICENSE file at http://angular.io/license
+*/
 
 
 

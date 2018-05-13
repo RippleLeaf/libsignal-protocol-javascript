@@ -1,3 +1,15 @@
+<!DOCTYPE html>
+<!-- <html> -->
+<html ng-app="messengerApp">
+<head>
+  <title></title>
+
+<!-- <meta http-equiv="Content-Security-Policy" content="default-src https://ajax.googleapis.com/"> -->
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<!-- <script src="todo.js"></script> -->
+<!-- <link rel="stylesheet" href="todo.css"> -->
+<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.0.4/css/bootstrap-combined.min.css">
+
 <script type="text/javascript" src="InMemorySignalProtocolStore.js"></script>
 <script type="text/javascript" src="test_setup.js"></script>
 <script type="text/javascript" src="../dist/libsignal-protocol.js">
@@ -23,8 +35,26 @@
 // }
 
 // var store = new SignalProtocolStore();
+
+
+
 var alice;
 var bob;
+
+
+function initAliceBobSession(alice, bob){
+  Promise.all(
+      [initClient("CS.6431", 6431), initClient("May.12", 2018)]).
+  then(function(users){
+      alice = users[0];
+      bob = users[1];
+      console.log(alice);
+      console.log(bob);
+      return buildSession(alice, bob);
+  }).then(function onsuccess() {
+      
+  });
+}
 
 Promise.all(
     [initClient("CS.6431", 6431), initClient("May.12", 2018)]).
@@ -62,33 +92,75 @@ then(function(users){
 });
 
 
-var alice = initClient("CS.6431", 6431)
-var bob = initClient("May.12", 2018);
+// var alice = initClient("CS.6431", 6431)
+// var bob = initClient("May.12", 2018);
 
-var address = new libsignal.SignalProtocolAddress("May.12",2018);
-var sessionBuilder = new libsignal.SessionBuilder(alice.store, address);
-var promise = sessionBuilder.processPreKey({
-    registrationId: bob.identifier,
-    identityKey: bob.store.store.identityKeyMay.pubKey,
-    signedPreKey: {
-        keyId: bob.keyId,
-        publicKey: bob.store.store["25519KeysignedKey2018"].pubKey,
-        signature: bob.store.store["25519KeysignedKey2018"].signature,
-    },
-    preKey:{
-        keyId: bob.keyId,
-        publicKey: bob.store.store["25519KeypreKey2018"].pubKey,
-    }
-});
+// var address = new libsignal.SignalProtocolAddress("May.12",2018);
+// var sessionBuilder = new libsignal.SessionBuilder(alice.store, address);
+// var promise = sessionBuilder.processPreKey({
+//     registrationId: bob.identifier,
+//     identityKey: bob.store.store.identityKeyMay.pubKey,
+//     signedPreKey: {
+//         keyId: bob.keyId,
+//         publicKey: bob.store.store["25519KeysignedKey2018"].pubKey,
+//         signature: bob.store.store["25519KeysignedKey2018"].signature,
+//     },
+//     preKey:{
+//         keyId: bob.keyId,
+//         publicKey: bob.store.store["25519KeypreKey2018"].pubKey,
+//     }
+// });
 
-promise.then(function onsuccess() {
-    var plaintext = "Hello world";
-    var sessionCipher = new libsignal.SessionCipher(alice.store, address);
-    return sessionCipher.encrypt(plaintext);
-}).then(function(ciphertext) {
-    console.log(ciphertext.type);
-    console.log(ciphertext.body);
-});
+// promise.then(function onsuccess() {
+//     var plaintext = "Hello world";
+//     var sessionCipher = new libsignal.SessionCipher(alice.store, address);
+//     return sessionCipher.encrypt(plaintext);
+// }).then(function(ciphertext) {
+//     console.log(ciphertext.type);
+//     console.log(ciphertext.body);
+// });
 </script>
 <!-- <script type="text/javascript">
 </script> -->
+</head>
+<body>
+
+
+
+<div ng-controller="MsgController as messenger">
+
+  <div align="left">
+    <h2>Alice</h2>
+    <form ng-submit="messenger.send('Alice')">
+      <input type="text" ng-model="messenger.aliceMsg"  size="30"
+             placeholder="type message here">
+      <input class="btn-primary" type="submit" value="Send to Bob">
+    </form>
+  </div>
+
+  <div align="right">
+    <h2>Bob</h2>
+    <form ng-submit="messenger.send('Bob')">
+      <input type="text" ng-model="messenger.bobMsg"  size="30"
+             placeholder="type message here">
+      <input class="btn-primary" type="submit" value="Send to Alice">
+    </form>
+  </div>
+
+  <h2>Messages</h2>
+  <!-- <span>{{todoList.remaining()}} of {{todoList.todos.length}} remaining {{Math.sqrt(2.0)}}</span>
+  [ <a href="" ng-click="todoList.archive()">archive</a> ] -->
+  <ul class="unstyled">
+    <li ng-repeat="todo in messenger.todos">
+      <!-- <label class="checkbox"> -->
+        <!-- <input type="checkbox" ng-model="todo.done"> -->
+        <!-- <span class="done-{{todo.}}">{{todo.text}}</span> -->
+        <div align="{{todo.align}}">{{todo.sender}}: {{todo.text}}</div>
+      <!-- </label> -->
+    </li>
+  </ul>
+</div>
+
+
+</body>
+</html>
