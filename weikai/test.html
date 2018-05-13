@@ -36,15 +36,29 @@ then(function(users){
     return buildSession(alice, bob);
 }).then(function onsuccess() {
     var plaintext = "Hello world";
-    return doEncrypt(alice, bob, plaintext);
+    return newEncrypt(alice, bob, plaintext);
 }).then(function(ciphertext) {
     // Bob receiving
-    return doDecrypt(alice, bob, ciphertext);
+    return newDecrypt(alice, bob, ciphertext);
 }).then(function(plaintext) {
     var str = dcodeIO.ByteBuffer.wrap(plaintext, "utf8").toString("utf8");
     console.log(str);
 }).catch(function(error) {
     console.log(error);
+}).then(function () {
+    return doEncrypt(bob, alice, "Hello 2nd world");
+}).then(function (ciphertext) {
+    return doDecrypt(bob, alice, ciphertext);
+}).then(function(plaintext) {
+    var str = dcodeIO.ByteBuffer.wrap(plaintext, "utf8").toString("utf8");
+    console.log(str);
+}).then(function () {
+    return doEncrypt(alice, bob, "Hello 3rd world");
+}).then(function (ciphertext) {
+    return doDecrypt(alice, bob, ciphertext);
+}).then(function(plaintext) {
+    var str = dcodeIO.ByteBuffer.wrap(plaintext, "utf8").toString("utf8");
+    console.log(str);
 });
 
 

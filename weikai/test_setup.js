@@ -53,17 +53,29 @@ function buildSession(sender, rcver){
 }
 
 
-function doEncrypt(sender, rcver, plaintext) {
+function newEncrypt(sender, rcver, plaintext) {
   var address = new libsignal.SignalProtocolAddress(rcver.identifier, rcver.keyId);
   var sessionCipher = new libsignal.SessionCipher(sender.store, address);
+  sender.sessionCipher = sessionCipher;
   return sessionCipher.encrypt(plaintext);
 }
 
+function doEncrypt(sender, rcver, plaintext) {
+  var address = new libsignal.SignalProtocolAddress(rcver.identifier, rcver.keyId);
+  return sender.sessionCipher.encrypt(plaintext);
+}
+
+
+function newDecrypt(sender, rcver, ciphertext) {
+  var address = new libsignal.SignalProtocolAddress(sender.identifier, sender.keyId);
+  var sessionCipher = new libsignal.SessionCipher(rcver.store, address);
+  rcver.sessionCipher = sessionCipher;
+  return sessionCipher.decryptPreKeyWhisperMessage(ciphertext.body, "binary");
+}
 
 function doDecrypt(sender, rcver, ciphertext) {
   var address = new libsignal.SignalProtocolAddress(sender.identifier, sender.keyId);
-  var sessionCipher = new libsignal.SessionCipher(rcver.store, address);
-  return sessionCipher.decryptPreKeyWhisperMessage(ciphertext.body, "binary");
+  return rcver.sessionCipher.decryptWhisperMessage(ciphertext.body, "binary");
 }
 
 
