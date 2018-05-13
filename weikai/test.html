@@ -38,21 +38,6 @@
 var alice;
 var bob;
 
-
-function initAliceBobSession(alice, bob){
-  Promise.all(
-      [initClient("CS.6431", 6431), initClient("May.12", 2018)]).
-  then(function(users){
-      alice = users[0];
-      bob = users[1];
-      console.log(alice);
-      console.log(bob);
-      return buildSession(alice, bob);
-  }).then(function onsuccess() {
-      
-  });
-}
-
 Promise.all(
     [initClient("CS.6431", 6431), initClient("May.12", 2018)]).
 then(function(users){
@@ -128,7 +113,11 @@ then(function(users){
 
   <div align="left">
     <h2>Alice</h2>
-    <form ng-submit="messenger.send('Alice')">
+    <form ng-submit="messenger.keyGen('Alice', 'CS.6431', 6431)">
+      <input class="btn-primary" type="submit" value="keyGen">
+    </form>
+
+    <form ng-submit="messenger.send('Alice', 'Bob')">
       <input type="text" ng-model="messenger.aliceMsg"  size="30"
              placeholder="type message here">
       <input class="btn-primary" type="submit" value="Send to Bob">
@@ -137,7 +126,11 @@ then(function(users){
 
   <div align="right">
     <h2>Bob</h2>
-    <form ng-submit="messenger.send('Bob')">
+    <form ng-submit="messenger.keyGen('Bob', 'May.12', 2018)">
+      <input class="btn-primary" type="submit" value="keyGen">
+    </form>
+
+    <form ng-submit="messenger.send('Bob', 'Alice')">
       <input type="text" ng-model="messenger.bobMsg"  size="30"
              placeholder="type message here">
       <input class="btn-primary" type="submit" value="Send to Alice">
