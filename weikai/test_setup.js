@@ -5,8 +5,6 @@
 // Return Promise of User Profile.
 //-----------------------------------------------
 function initClient(identifier, keyId){
-  // var identifier = "CS.6431";
-  // var keyId = 6431;
   var store = new SignalProtocolStore();
   var KeyHelper = libsignal.KeyHelper;
   var registrationId = KeyHelper.generateRegistrationId();
@@ -69,20 +67,6 @@ function buildSession(sender, rcver){
   var address = new libsignal.SignalProtocolAddress(rcver.identifier, rcver.keyId);
   var sessionBuilder = new libsignal.SessionBuilder(sender.store, address);
   return sessionBuilder.processPreKey(rcver.publicId);
-  // return sessionBuilder.processPreKey({
-  //     // FIXIT: use get/put
-  //     registrationId: rcver.identifier,
-  //     identityKey: rcver.store.store.identityKeyMay.pubKey,
-  //     signedPreKey: {
-  //         keyId: rcver.keyId,
-  //         publicKey: rcver.store.store["25519KeysignedKey2018"].pubKey,
-  //         signature: rcver.store.store["25519KeysignedKey2018"].signature,
-  //     },
-  //     preKey:{
-  //         keyId: rcver.keyId,
-  //         publicKey: rcver.store.store["25519KeypreKey2018"].pubKey,
-  //     }
-  // });
 }
 
 
@@ -151,10 +135,7 @@ function receiveMessage(sender, rcver, ciphertext) {
     // console.log('doDecrypt');
     return doDecrypt(sender, rcver, ciphertext);
   }
-  // body...
 }
-
-
 
 
 
@@ -171,12 +152,6 @@ angular.module('messengerApp', [])
           console.log(user);
       });
     };
-
-    // messenger.hasKeyGen = function(sender) {
-    //   if(globalStorage[sender] == undefined)
-    //     return false;
-    //   return true;
-    // };
 
     messenger.send = function(sender, rcver) {
       // var textAlign = 'left';

@@ -10,31 +10,7 @@
 <script type="text/javascript" src="InMemorySignalProtocolStore.js"></script>
 <script type="text/javascript" src="test_setup.js"></script>
 <script type="text/javascript" src="../dist/libsignal-protocol.js">
-
-// function initClient(keyId){
-//   // var keyId = 6431;
-//   var store = new SignalProtocolStore();
-//   var KeyHelper = libsignal.KeyHelper;
-//   var registrationId = KeyHelper.generateRegistrationId();
-//   var identityKeyPair;
-
-//   KeyHelper.generateIdentityKeyPair().then(function(identityKP) { 
-//     store.saveIdentity()
-//   });
-//   var preKey;
-//   KeyHelper.generatePreKey(keyId).then(function(preK) {
-//     preKey = preK;
-//   });
-//   var signedPreKey;
-//   KeyHelper.generateSignedPreKey(identityKeyPair, keyId).then(function(signedPreK){
-//       signedPreKey = signedPreK;
-//   });
-// }
-
-// var store = new SignalProtocolStore();
-
-
-
+// test code.
 var alice;
 var bob;
 
@@ -73,44 +49,13 @@ then(function(users){
     console.log(str);
 });
 
-
-// var alice = initClient("CS.6431", 6431)
-// var bob = initClient("May.12", 2018);
-
-// var address = new libsignal.SignalProtocolAddress("May.12",2018);
-// var sessionBuilder = new libsignal.SessionBuilder(alice.store, address);
-// var promise = sessionBuilder.processPreKey({
-//     registrationId: bob.identifier,
-//     identityKey: bob.store.store.identityKeyMay.pubKey,
-//     signedPreKey: {
-//         keyId: bob.keyId,
-//         publicKey: bob.store.store["25519KeysignedKey2018"].pubKey,
-//         signature: bob.store.store["25519KeysignedKey2018"].signature,
-//     },
-//     preKey:{
-//         keyId: bob.keyId,
-//         publicKey: bob.store.store["25519KeypreKey2018"].pubKey,
-//     }
-// });
-
-// promise.then(function onsuccess() {
-//     var plaintext = "Hello world";
-//     var sessionCipher = new libsignal.SessionCipher(alice.store, address);
-//     return sessionCipher.encrypt(plaintext);
-// }).then(function(ciphertext) {
-//     console.log(ciphertext.type);
-//     console.log(ciphertext.body);
-// });
 </script>
-<!-- <script type="text/javascript">
-</script> -->
 </head>
 <body>
 
 
 
 <div ng-controller="MsgController as messenger">
-
   <div align="left">
     <h2>Alice</h2>
     <form ng-submit="messenger.keyGen('Alice', 'CS.6431', 6431)">
