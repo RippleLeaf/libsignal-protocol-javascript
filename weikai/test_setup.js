@@ -31,3 +31,42 @@ function initClient(identifier, keyId){
     return ret;
   });
 }
+
+
+function buildSession(sender, rcver){ 
+  var address = new libsignal.SignalProtocolAddress(rcver.identifier, rcver.keyId);
+  var sessionBuilder = new libsignal.SessionBuilder(sender.store, address);
+  return sessionBuilder.processPreKey({
+      // FIXIT: use get/put
+      registrationId: rcver.identifier,
+      identityKey: rcver.store.store.identityKeyMay.pubKey,
+      signedPreKey: {
+          keyId: rcver.keyId,
+          publicKey: rcver.store.store["25519KeysignedKey2018"].pubKey,
+          signature: rcver.store.store["25519KeysignedKey2018"].signature,
+      },
+      preKey:{
+          keyId: rcver.keyId,
+          publicKey: rcver.store.store["25519KeypreKey2018"].pubKey,
+      }
+  });
+}
+
+
+function doEncrypt(sender, rcver, plaintext) {
+  var address = new libsignal.SignalProtocolAddress(rcver.identifier, rcver.keyId);
+  var sessionCipher = new libsignal.SessionCipher(sender.store, address);
+  return sessionCipher.encrypt(plaintext);
+}
+
+
+function doDecrypt(sender, rcver, ciphertext) {
+  var address = new libsignal.SignalProtocolAddress(sender.identifier, sender.keyId);
+  var sessionCipher = new libsignal.SessionCipher(rcver.store, address);
+  return sessionCipher.decryptPreKeyWhisperMessage(ciphertext.body, "binary");
+}
+
+
+
+
+

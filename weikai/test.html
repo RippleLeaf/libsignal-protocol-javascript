@@ -23,49 +23,29 @@
 // }
 
 // var store = new SignalProtocolStore();
+var alice;
+var bob;
 
 Promise.all(
     [initClient("CS.6431", 6431), initClient("May.12", 2018)]).
-  then(function(users){
-    var alice = users[0];
-    var bob = users[1];
-    var address = new libsignal.SignalProtocolAddress("May.12", 2018);
-    var sessionBuilder = new libsignal.SessionBuilder(alice.store, address);
-    var promise = sessionBuilder.processPreKey({
-        registrationId: bob.identifier,
-        identityKey: bob.store.store.identityKeyMay.pubKey,
-        signedPreKey: {
-            keyId: bob.keyId,
-            publicKey: bob.store.store["25519KeysignedKey2018"].pubKey,
-            signature: bob.store.store["25519KeysignedKey2018"].signature,
-        },
-        preKey:{
-            keyId: bob.keyId,
-            publicKey: bob.store.store["25519KeypreKey2018"].pubKey,
-        }
-    });
+then(function(users){
+    alice = users[0];
+    bob = users[1];
     console.log(alice);
     console.log(bob);
-    // var = ct;
-
-    promise.then(function onsuccess() {
-        var plaintext = "Hello world";
-        var sessionCipher = new libsignal.SessionCipher(alice.store, address);
-        return sessionCipher.encrypt(plaintext);
-    }).then(function(ciphertext) {
-        // ct = ciphertext;
-        // Bob receiving
-        console.log(ciphertext);
-
-        var address = new libsignal.SignalProtocolAddress("CS.6431", 6431);
-        var sessionCipher = new libsignal.SessionCipher(bob.store, address);
-        sessionCipher.decryptPreKeyWhisperMessage(ciphertext.body, "binary").then(function(plaintext) {
-          console.log(plaintext);
-        }).catch(function(error) {
-          console.log(error);
-        });
-    });
-  });
+    return buildSession(alice, bob);
+}).then(function onsuccess() {
+    var plaintext = "Hello world";
+    return doEncrypt(alice, bob, plaintext);
+}).then(function(ciphertext) {
+    // Bob receiving
+    return doDecrypt(alice, bob, ciphertext);
+}).then(function(plaintext) {
+    var str = dcodeIO.ByteBuffer.wrap(plaintext, "utf8").toString("utf8");
+    console.log(str);
+}).catch(function(error) {
+    console.log(error);
+});
 
 
 var alice = initClient("CS.6431", 6431)
