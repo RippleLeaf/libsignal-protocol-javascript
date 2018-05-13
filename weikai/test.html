@@ -4,10 +4,7 @@
 <head>
   <title></title>
 
-<!-- <meta http-equiv="Content-Security-Policy" content="default-src https://ajax.googleapis.com/"> -->
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
-<!-- <script src="todo.js"></script> -->
-<!-- <link rel="stylesheet" href="todo.css"> -->
 <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.0.4/css/bootstrap-combined.min.css">
 
 <script type="text/javascript" src="InMemorySignalProtocolStore.js"></script>
@@ -148,15 +145,9 @@ then(function(users){
   </div>
 
   <h2>Messages</h2>
-  <!-- <span>{{todoList.remaining()}} of {{todoList.todos.length}} remaining {{Math.sqrt(2.0)}}</span>
-  [ <a href="" ng-click="todoList.archive()">archive</a> ] -->
   <ul class="unstyled">
-    <li ng-repeat="todo in messenger.todos">
-      <!-- <label class="checkbox"> -->
-        <!-- <input type="checkbox" ng-model="todo.done"> -->
-        <!-- <span class="done-{{todo.}}">{{todo.text}}</span> -->
-        <div align="{{todo.align}}">{{todo.sender}}: {{todo.text}}</div>
-      <!-- </label> -->
+    <li ng-repeat="msg in messenger.plaintexts">
+      <div align="{{msg.align}}">{{msg.sender}}: {{msg.text}}</div>
     </li>
   </ul>
 </div>

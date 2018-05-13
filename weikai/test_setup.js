@@ -81,20 +81,18 @@ function doDecrypt(sender, rcver, ciphertext) {
 angular.module('messengerApp', [])
   .controller('MsgController', function() {
     var messenger = this;
-    messenger.todos = [];
-      // {text:'learn AngularJS', done:true},
-      // {text:'build an AngularJS app', done:false}];
+    messenger.plaintexts = [];
 
     messenger.send = function(sender) {
       var textAlign = 'left';
-      var textbox = messenger.aliceMsg;
+      var plaintext = messenger.aliceMsg;
       if(sender == 'Bob'){
         textAlign = 'right';
-        textbox = messenger.bobMsg;
+        plaintext = messenger.bobMsg;
       }
       console.log(messenger.sender);
-      messenger.todos.push({
-          text: textbox,
+      messenger.plaintexts.push({
+          text: plaintext,
           sender: sender, 
           align: textAlign});
       if(sender == 'Alice'){
@@ -104,23 +102,6 @@ angular.module('messengerApp', [])
         messenger.bobMsg = '';
       }
     };
-
-    // messenger.remaining = function() {
-    //   var count = 0;
-    //   angular.forEach(messenger.todos, function(todo) {
-    //     count += todo.done ? 0 : 1;
-    //   });
-    //   return count;
-    // };
-
-    // messenger.archive = function() {
-    //   var oldTodos = messenger.todos;
-    //   messenger.todos = [];
-    //   angular.forEach(oldTodos, function(todo) {
-    //     if (!todo.done) messenger.todos.push(todo);
-    //   });
-    // };
-
 
     messenger.isString = function(s) {
         return angular.isString(s);
