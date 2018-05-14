@@ -14,9 +14,10 @@ SessionCipher.prototype = {
   },
   encrypt: function(buffer, encoding) {
     // WK: CTR mode, add 2 more blocks as keys.
-    buffer = dcodeIO.ByteBuffer.wrap(buffer, encoding).
-        prepend(new ArrayBuffer(Internal.crypto.signKeyLength*2)).toArrayBuffer();
-    // buffer = dcodeIO.ByteBuffer.wrap(buffer, encoding).toArrayBuffer();
+    plainByteBuffer = dcodeIO.ByteBuffer.wrap(buffer, encoding);
+    buffer = plainByteBuffer.toArrayBuffer();
+    var ctrBuffer = plainByteBuffer.prepend(
+          new ArrayBuffer(Internal.crypto.signKeyLength*2)).toArrayBuffer();
     return Internal.SessionLock.queueJobForNumber(this.remoteAddress.toString(), function() {
       if (!(buffer instanceof ArrayBuffer)) {
           throw new Error("Expected buffer to be an ArrayBuffer");
@@ -66,23 +67,29 @@ SessionCipher.prototype = {
 // WK: added AES-CTR wrapper, https://www.w3.org/TR/WebCryptoAPI/#aes-ctr-description
 // WK: need PRF (just AES-CBC? or just HMAC/crypto.sign?)
           return Internal.crypto.encryptAesCtr(
-              keys[0], buffer, keys[2].slice(0, 16)
+              keys[0], ctrBuffer, keys[2].slice(0, 16)
           ).then(function(ciphertext) {
               var commitKey = ciphertext.slice(0, Internal.crypto.signKeyLength);
+              var macKey = ciphertext.slice(Internal.crypto.signKeyLength, Internal.crypto.signKeyLength*2);
               msg.ciphertext = ciphertext.slice(Internal.crypto.signKeyLength*2);
               var encodedMsg = msg.toArrayBuffer();
 
-              var macInput = new Uint8Array(encodedMsg.byteLength + 33*2 + 1);
+              var macInput = new Uint8Array(buffer.byteLength + 33*2 + 1);
               macInput.set(new Uint8Array(util.toArrayBuffer(ourIdentityKey.pubKey)));
               macInput.set(new Uint8Array(util.toArrayBuffer(session.indexInfo.remoteIdentityKey)), 33);
               macInput[33*2] = (3 << 4) | 3;
-              macInput.set(new Uint8Array(encodedMsg), 33*2 + 1);
-
-              return Internal.crypto.sign(keys[1], macInput.buffer).then(function(mac) {
-                  var result = new Uint8Array(encodedMsg.byteLength + 9);
+              macInput.set(new Uint8Array(buffer), 33*2 + 1);
+              return Internal.crypto.sign(commitKey, macInput.buffer).then(function(commitment) {
+                  return Promise.all([Internal.crypto.sign(macKey, commitment), commitment]);
+              }).then(function (tags){
+                  var mac = tags[0], commitment = tags[1];
+                  // WK: cipher format is [version: 1, ct, tag: 32, commitment: 32]
+                  var result = new Uint8Array(encodedMsg.byteLength + 1 + Internal.crypto.signKeyLength*2);
                   result[0] = (3 << 4) | 3;
                   result.set(new Uint8Array(encodedMsg), 1);
-                  result.set(new Uint8Array(mac, 0, 8), encodedMsg.byteLength + 1);
+                  result.set(new Uint8Array(mac), encodedMsg.byteLength + 1);
+                  result.set(new Uint8Array(commitment),
+                        encodedMsg.byteLength + 1 + Internal.crypto.signKeyLength);
 
                   return this.storage.isTrustedIdentity(
                       this.remoteAddress.getName(), util.toArrayBuffer(session.indexInfo.remoteIdentityKey), this.storage.Direction.SENDING
@@ -231,8 +238,10 @@ SessionCipher.prototype = {
     if ((version & 0xF) > 3 || (version >> 4) < 3) {  // min version > 3 or max version < 3
         throw new Error("Incompatible version number on WhisperMessage");
     }
-    var messageProto = messageBytes.slice(1, messageBytes.byteLength- 8);
-    var mac = messageBytes.slice(messageBytes.byteLength - 8, messageBytes.byteLength);
+    var msgLen = messageBytes.byteLength;
+    var messageProto = messageBytes.slice(1, msgLen - Internal.crypto.signKeyLength*2);
+    var mac = messageBytes.slice(msgLen - Internal.crypto.signKeyLength*2, msgLen - Internal.crypto.signKeyLength);
+    var commitment = messageBytes.slice(msgLen - Internal.crypto.signKeyLength);
 
     var message = Internal.protobuf.WhisperMessage.decode(messageProto);
     var remoteEphemeralKey = message.ephemeralKey.toArrayBuffer();
@@ -261,24 +270,31 @@ SessionCipher.prototype = {
             return Internal.HKDF(util.toArrayBuffer(messageKey), new ArrayBuffer(32), "WhisperMessageKeys");
         });
     }.bind(this)).then(function(keys) {
-        return this.storage.getIdentityKeyPair().then(function(ourIdentityKey) {
-
-            var macInput = new Uint8Array(messageProto.byteLength + 33*2 + 1);
-            macInput.set(new Uint8Array(util.toArrayBuffer(session.indexInfo.remoteIdentityKey)));
-            macInput.set(new Uint8Array(util.toArrayBuffer(ourIdentityKey.pubKey)), 33);
-            macInput[33*2] = (3 << 4) | 3;
-            macInput.set(new Uint8Array(messageProto), 33*2 + 1);
-
-            return Internal.verifyMAC(macInput.buffer, keys[1], mac, 8);
-        }.bind(this)).then(function() {
-            var ciphertext = dcodeIO.ByteBuffer.wrap(message.ciphertext.toArrayBuffer()).
-                prepend(new ArrayBuffer(Internal.crypto.signKeyLength*2)).toArrayBuffer();
-            return Internal.crypto.decryptAesCtr(keys[0], ciphertext, keys[2].slice(0, 16));
-        });
-    }.bind(this)).then(function(plaintext) {
+        var ciphertext = dcodeIO.ByteBuffer.wrap(message.ciphertext.toArrayBuffer()).
+            prepend(new ArrayBuffer(Internal.crypto.signKeyLength*2)).toArrayBuffer();
+        return Promise.all([
+            Internal.crypto.decryptAesCtr(keys[0], ciphertext, keys[2].slice(0, 16)),
+            this.storage.getIdentityKeyPair()]);
+    }.bind(this)).then(function(ret) {
         delete session.pendingPreKey;
         // console.log(plaintext);
-        return plaintext.slice(Internal.crypto.signKeyLength*2);
+        var plaintext = ret[0], ourIdentityKey = ret[1];
+        var commitKey = plaintext.slice(0, Internal.crypto.signKeyLength);
+        var macKey = plaintext.slice(Internal.crypto.signKeyLength, Internal.crypto.signKeyLength*2);
+
+        plaintext = plaintext.slice(Internal.crypto.signKeyLength*2);
+        var macInput = new Uint8Array(plaintext.byteLength + 33*2 + 1);
+        macInput.set(new Uint8Array(util.toArrayBuffer(session.indexInfo.remoteIdentityKey)));
+        macInput.set(new Uint8Array(util.toArrayBuffer(ourIdentityKey.pubKey)), 33);
+        macInput[33*2] = (3 << 4) | 3;
+        macInput.set(new Uint8Array(plaintext), 33*2 + 1);
+        return Promise.all([
+            plaintext, commitKey,
+            Internal.verifyMAC(macInput.buffer, commitKey, commitment, 32),
+            Internal.verifyMAC(commitment, macKey, mac, 32)
+        ]);
+    }).then(function (ret){
+        return ret[0];
     });
   },
   fillMessageKeys: function(chain, counter) {
