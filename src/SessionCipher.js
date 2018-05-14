@@ -58,6 +58,10 @@ SessionCipher.prototype = {
           msg.counter = chain.chainKey.counter;
           msg.previousCounter = session.currentRatchet.previousCounter;
 
+// WK: encrypt is AES-CBC, keys[0] is symmetric key, keys[2] is IV.
+// WK: can use keys[0] and keys[2] in new implementation
+// WK: to add AES-CTR wrapper, https://www.w3.org/TR/WebCryptoAPI/#aes-ctr-description
+// WK: need PRF (just AES-CBC?)
           return Internal.crypto.encrypt(
               keys[0], buffer, keys[2].slice(0, 16)
           ).then(function(ciphertext) {
