@@ -65,7 +65,7 @@ SessionCipher.prototype = {
 // WK: encrypt is AES-CBC, keys[0] is symmetric key, keys[2] is IV.
 // WK: can use keys[0] and keys[2] in new implementation
 // WK: added AES-CTR wrapper, https://www.w3.org/TR/WebCryptoAPI/#aes-ctr-description
-// WK: need PRF (just AES-CBC? or just HMAC/crypto.sign?)
+// WK: just HMAC/crypto.sign
           return Internal.crypto.encryptAesCtr(
               keys[0], ctrBuffer, keys[2].slice(0, 16)
           ).then(function(ciphertext) {
@@ -289,12 +289,20 @@ SessionCipher.prototype = {
         macInput[33*2] = (3 << 4) | 3;
         macInput.set(new Uint8Array(plaintext), 33*2 + 1);
         return Promise.all([
-            plaintext, commitKey,
+            plaintext, 
+            commitKey, 
+            commitment,
+            macInput.slice(0, 33*2 + 1),
             Internal.verifyMAC(macInput.buffer, commitKey, commitment, 32),
             Internal.verifyMAC(commitment, macKey, mac, 32)
         ]);
     }).then(function (ret){
-        return ret[0];
+        return {
+            header: ret[3],
+            body: ret[0],
+            commitKey: ret[1],
+            commitment: ret[2],
+        };
     });
   },
   fillMessageKeys: function(chain, counter) {
