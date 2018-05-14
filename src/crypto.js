@@ -36,24 +36,12 @@ var Internal = Internal || {};
         },
         encryptAesCtr: function(key, data, ctr) {
             return crypto.subtle.importKey('raw', key, {name: 'AES-CTR'}, false, ['encrypt']).then(function(key) {
-                // var ctrLen = Math.ceil(Math.log2(data.length / 16));
                 return crypto.subtle.encrypt(Internal.crypto._aesCtrPara(data, ctr), key, data);
-                // return crypto.subtle.encrypt({
-                //         name: 'AES-CTR', 
-                //         counter: new Uint8Array(ctr), 
-                //         length: ctrLen}, 
-                //     key, data);
             });
         },
         decryptAesCtr: function(key, data, ctr) {
             return crypto.subtle.importKey('raw', key, {name: 'AES-CTR'}, false, ['decrypt']).then(function(key) {
-                // var ctrLen = Math.ceil(Math.log2(data.length / 16));
                 return crypto.subtle.decrypt(Internal.crypto._aesCtrPara(data, ctr), key, data);
-                // return crypto.subtle.decrypt({
-                //         name: 'AES-CTR', 
-                //         counter: new Uint8Array(ctr), 
-                //         length: ctrLen}, 
-                //     key, data);
             });
         },
 
