@@ -13,7 +13,10 @@ SessionCipher.prototype = {
       });
   },
   encrypt: function(buffer, encoding) {
-    buffer = dcodeIO.ByteBuffer.wrap(buffer, encoding).toArrayBuffer();
+    // WK: CTR mode, add 2 more blocks as keys.
+    buffer = dcodeIO.ByteBuffer.wrap(buffer, encoding).
+        prepend(new ArrayBuffer(Internal.crypto.aesBlockSize*2)).toArrayBuffer();
+    // buffer = dcodeIO.ByteBuffer.wrap(buffer, encoding).toArrayBuffer();
     return Internal.SessionLock.queueJobForNumber(this.remoteAddress.toString(), function() {
       if (!(buffer instanceof ArrayBuffer)) {
           throw new Error("Expected buffer to be an ArrayBuffer");
@@ -60,12 +63,13 @@ SessionCipher.prototype = {
 
 // WK: encrypt is AES-CBC, keys[0] is symmetric key, keys[2] is IV.
 // WK: can use keys[0] and keys[2] in new implementation
-// WK: to add AES-CTR wrapper, https://www.w3.org/TR/WebCryptoAPI/#aes-ctr-description
-// WK: need PRF (just AES-CBC?)
-          return Internal.crypto.encrypt(
+// WK: added AES-CTR wrapper, https://www.w3.org/TR/WebCryptoAPI/#aes-ctr-description
+// WK: need PRF (just AES-CBC? or just HMAC/crypto.sign?)
+          return Internal.crypto.encryptAesCtr(
               keys[0], buffer, keys[2].slice(0, 16)
           ).then(function(ciphertext) {
-              msg.ciphertext = ciphertext;
+              var commitKey = ciphertext.slice(0, Internal.crypto.aesBlockSize);
+              msg.ciphertext = ciphertext.slice(Internal.crypto.aesBlockSize*2);
               var encodedMsg = msg.toArrayBuffer();
 
               var macInput = new Uint8Array(encodedMsg.byteLength + 33*2 + 1);
@@ -267,11 +271,14 @@ SessionCipher.prototype = {
 
             return Internal.verifyMAC(macInput.buffer, keys[1], mac, 8);
         }.bind(this)).then(function() {
-            return Internal.crypto.decrypt(keys[0], message.ciphertext.toArrayBuffer(), keys[2].slice(0, 16));
+            var ciphertext = dcodeIO.ByteBuffer.wrap(message.ciphertext.toArrayBuffer()).
+                prepend(new ArrayBuffer(Internal.crypto.aesBlockSize*2)).toArrayBuffer();
+            return Internal.crypto.decryptAesCtr(keys[0], ciphertext, keys[2].slice(0, 16));
         });
     }.bind(this)).then(function(plaintext) {
         delete session.pendingPreKey;
-        return plaintext;
+        // console.log(plaintext);
+        return plaintext.slice(Internal.crypto.aesBlockSize*2);
     });
   },
   fillMessageKeys: function(chain, counter) {
