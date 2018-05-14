@@ -15,7 +15,7 @@ SessionCipher.prototype = {
   encrypt: function(buffer, encoding) {
     // WK: CTR mode, add 2 more blocks as keys.
     buffer = dcodeIO.ByteBuffer.wrap(buffer, encoding).
-        prepend(new ArrayBuffer(Internal.crypto.aesBlockSize*2)).toArrayBuffer();
+        prepend(new ArrayBuffer(Internal.crypto.signKeyLength*2)).toArrayBuffer();
     // buffer = dcodeIO.ByteBuffer.wrap(buffer, encoding).toArrayBuffer();
     return Internal.SessionLock.queueJobForNumber(this.remoteAddress.toString(), function() {
       if (!(buffer instanceof ArrayBuffer)) {
@@ -68,8 +68,8 @@ SessionCipher.prototype = {
           return Internal.crypto.encryptAesCtr(
               keys[0], buffer, keys[2].slice(0, 16)
           ).then(function(ciphertext) {
-              var commitKey = ciphertext.slice(0, Internal.crypto.aesBlockSize);
-              msg.ciphertext = ciphertext.slice(Internal.crypto.aesBlockSize*2);
+              var commitKey = ciphertext.slice(0, Internal.crypto.signKeyLength);
+              msg.ciphertext = ciphertext.slice(Internal.crypto.signKeyLength*2);
               var encodedMsg = msg.toArrayBuffer();
 
               var macInput = new Uint8Array(encodedMsg.byteLength + 33*2 + 1);
@@ -272,13 +272,13 @@ SessionCipher.prototype = {
             return Internal.verifyMAC(macInput.buffer, keys[1], mac, 8);
         }.bind(this)).then(function() {
             var ciphertext = dcodeIO.ByteBuffer.wrap(message.ciphertext.toArrayBuffer()).
-                prepend(new ArrayBuffer(Internal.crypto.aesBlockSize*2)).toArrayBuffer();
+                prepend(new ArrayBuffer(Internal.crypto.signKeyLength*2)).toArrayBuffer();
             return Internal.crypto.decryptAesCtr(keys[0], ciphertext, keys[2].slice(0, 16));
         });
     }.bind(this)).then(function(plaintext) {
         delete session.pendingPreKey;
         // console.log(plaintext);
-        return plaintext.slice(Internal.crypto.aesBlockSize*2);
+        return plaintext.slice(Internal.crypto.signKeyLength*2);
     });
   },
   fillMessageKeys: function(chain, counter) {

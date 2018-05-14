@@ -34,7 +34,7 @@ var Internal = Internal || {};
             var ctrLen = Math.ceil(Math.log2(Math.max(Math.ceil(data.byteLength / 16), 2)));
             return {name: 'AES-CTR', counter: new Uint8Array(ctr), length: ctrLen};
         },
-        aesBlockSize: 16,
+        signKeyLength: 32,
         encryptAesCtr: function(key, data, ctr) {
             return crypto.subtle.importKey('raw', key, {name: 'AES-CTR'}, false, ['encrypt']).then(function(key) {
                 return crypto.subtle.encrypt(Internal.crypto._aesCtrPara(data, ctr), key, data);
