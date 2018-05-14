@@ -29,6 +29,34 @@ var Internal = Internal || {};
                 return crypto.subtle.decrypt({name: 'AES-CBC', iv: new Uint8Array(iv)}, key, data);
             });
         },
+        // WK: wrapper of AES-CTR, 128-bit block.
+        _aesCtrPara: function(data, ctr) {
+            var ctrLen = Math.ceil(Math.log2(Math.max(Math.ceil(data.byteLength / 16), 2)));
+            return {name: 'AES-CTR', counter: new Uint8Array(ctr), length: ctrLen};
+        },
+        encryptAesCtr: function(key, data, ctr) {
+            return crypto.subtle.importKey('raw', key, {name: 'AES-CTR'}, false, ['encrypt']).then(function(key) {
+                // var ctrLen = Math.ceil(Math.log2(data.length / 16));
+                return crypto.subtle.encrypt(Internal.crypto._aesCtrPara(data, ctr), key, data);
+                // return crypto.subtle.encrypt({
+                //         name: 'AES-CTR', 
+                //         counter: new Uint8Array(ctr), 
+                //         length: ctrLen}, 
+                //     key, data);
+            });
+        },
+        decryptAesCtr: function(key, data, ctr) {
+            return crypto.subtle.importKey('raw', key, {name: 'AES-CTR'}, false, ['decrypt']).then(function(key) {
+                // var ctrLen = Math.ceil(Math.log2(data.length / 16));
+                return crypto.subtle.decrypt(Internal.crypto._aesCtrPara(data, ctr), key, data);
+                // return crypto.subtle.decrypt({
+                //         name: 'AES-CTR', 
+                //         counter: new Uint8Array(ctr), 
+                //         length: ctrLen}, 
+                //     key, data);
+            });
+        },
+
         sign: function(key, data) {
             return crypto.subtle.importKey('raw', key, {name: 'HMAC', hash: {name: 'SHA-256'}}, false, ['sign']).then(function(key) {
                 return crypto.subtle.sign( {name: 'HMAC', hash: 'SHA-256'}, key, data);
