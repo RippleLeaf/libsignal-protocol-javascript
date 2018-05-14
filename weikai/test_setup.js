@@ -86,15 +86,27 @@ function doEncrypt(sender, rcver, plaintext) {
 
 
 function newDecrypt(sender, rcver, ciphertext) {
-  var address = new libsignal.SignalProtocolAddress(sender.identifier, sender.keyId);
-  var sessionCipher = new libsignal.SessionCipher(rcver.store, address);
-  rcver.sessionCipher = sessionCipher;
-  return sessionCipher.decryptPreKeyWhisperMessage(ciphertext.body, "binary");
+  // var address = new libsignal.SignalProtocolAddress(sender.identifier, sender.keyId);
+  // var sessionCipher = new libsignal.SessionCipher(rcver.store, address);
+  // rcver.sessionCipher = sessionCipher;
+  // return sessionCipher.decryptPreKeyWhisperMessage(ciphertext.body, "binary");
+  return {
+      header: 'H (ArrayBuffer)',
+      body: 'M (ArrayBuffer)',
+      commitKey: 'Kf (ArrayBuffer)',
+      commitment: 'C2 (ArrayBuffer)',
+  };
 }
 
 function doDecrypt(sender, rcver, ciphertext) {
-  var address = new libsignal.SignalProtocolAddress(sender.identifier, sender.keyId);
-  return rcver.sessionCipher.decryptWhisperMessage(ciphertext.body, "binary");
+  // var address = new libsignal.SignalProtocolAddress(sender.identifier, sender.keyId);
+  // return rcver.sessionCipher.decryptWhisperMessage(ciphertext.body, "binary");
+  return {
+      header: 'H (ArrayBuffer)',
+      body: 'M (ArrayBuffer)',
+      commitKey: 'Kf (ArrayBuffer)',
+      commitment: 'C2 (ArrayBuffer)',
+  };
 }
 
 //-----------------------------------------------
