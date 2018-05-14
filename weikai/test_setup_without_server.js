@@ -1,6 +1,4 @@
 
-
-
 //-----------------------------------------------
 // Generate User Profile, including IDs, public and private key pairs,
 // and signature, which is a custom struct.
@@ -105,9 +103,6 @@ function sendMessage(sender, rcver, plaintext) {
   if(sender.handShake == undefined){
     sender.handShake = [];
   }
-  // if the sender hasn't shaked hands with the rcv
-  // build a new session
-
   if(sender.handShake[rcver.name] == undefined ||
       sender.handShake[rcver.name] == false){
     sender.handShake[rcver.name] = false;
@@ -130,7 +125,6 @@ function receiveMessage(sender, rcver, ciphertext) {
   if(rcver.handShake == undefined){
     rcver.handShake = [];
   }
-
   if(rcver.handShake[sender.name] == undefined){
     // console.log('newDecrypt');
     rcver.handShake[sender.name] = true;
@@ -139,51 +133,9 @@ function receiveMessage(sender, rcver, ciphertext) {
   else{
     rcver.handShake[sender.name] = true;
     // console.log('doDecrypt');
-
     return doDecrypt(sender, rcver, ciphertext);
   }
 }
-
-
-
-//-----------------------------------------------
-// Generate the secret key of the server
-// Return Promise of server setting.
-//-----------------------------------------------
-var server = function(){
-  var secretKey;
-  var userList = {};
-
-  init = function() {
-    //TODO: generate random symmetric key
-    secretKey = "testkey"
-  }
-
-  signMessage = function(sender, rcver, msg){
-    var evidence;
-
-    if (msg.type == 1){
-      buffer = dcodeIO.ByteBuffer.wrap(msg.body, 'binary').toArrayBuffer(); 
-    }
-    if (msg.type == 3){
-      var buffer = dcodeIO.ByteBuffer.wrap(msg.body, 'binary'); // PrekeyMsg
-      var version = buffer.readUint8();
-    }
-    // TODO: sign on evidence (sender || rcver || C2)
-    Internal.crypto.sign(key, byteArray.buffer).then(
-      );
-    msg.evidence = evidence;
-  }
-
-  report = function(reporter, sender, msg, keyF, evidence){
-    //TODO: check if evidence is correctly signed
-
-    //TODO: recalculate C2', compare with C2
-
-    //TODO: if all passed, return success
-  }
-}
-server.init();
 
 
 
@@ -201,9 +153,6 @@ angular.module('messengerApp', [])
       });
     };
 
-    //-----------------------------------------------
-    // Input the name of sender and receiver
-    //-----------------------------------------------
     messenger.send = function(sender, rcver) {
       // var textAlign = 'left';
       var plaintext = messenger.aliceMsg;
@@ -213,18 +162,14 @@ angular.module('messengerApp', [])
       }
       senderStorage = globalStorage[sender];
       rcverStorage = globalStorage[rcver];
-      sendMessage(senderStorage, rcverStorage, plaintext)
-      .then(function (ciphertext) {
+      sendMessage(senderStorage, rcverStorage, plaintext).
+      then(function (ciphertext) {
         // draw sender...
-        //TODO: ask server to sign C2
         console.log(ciphertext);
         return receiveMessage(senderStorage, rcverStorage, ciphertext);
       }).then(function (plaintext) {
           return dcodeIO.ByteBuffer.wrap(plaintext, "utf8").toString("utf8");
       }).then(function (plaintext) {
-        //TODO: check if the evidence is 
-
-        //TODO: store the signed evidence for reporting in future
         console.log(plaintext);
         // draw receiver...
       });
@@ -248,8 +193,6 @@ angular.module('messengerApp', [])
     //     messenger.bobMsg = '';
     //   }
     // };
-
-    //TODO: listener to report button
 
     messenger.isString = function(s) {
         return angular.isString(s);
