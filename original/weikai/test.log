@@ -1,0 +1,84 @@
+
+var KeyHelper = libsignal.KeyHelper;
+undefined
+libsignal.KeyHelper
+{generateIdentityKeyPair: ƒ, generateRegistrationId: ƒ, generateSignedPreKey: ƒ, generatePreKey: ƒ}
+var KeyHelper = libsignal.KeyHelper;
+undefined
+Key
+VM76:1 Uncaught ReferenceError: Key is not defined
+    at <anonymous>:1:1
+(anonymous) @ VM76:1
+KeyHelper
+{generateIdentityKeyPair: ƒ, generateRegistrationId: ƒ, generateSignedPreKey: ƒ, generatePreKey: ƒ}
+var registrationId = KeyHelper.generateRegistrationId();
+undefined
+reg
+VM86:1 Uncaught ReferenceError: reg is not defined
+    at <anonymous>:1:1
+(anonymous) @ VM86:1
+registrationId
+13493
+KeyHelper.generateIdentityKeyPair().then(function(identityKeyPair) {
+    
+    
+}
+VM99:4 Uncaught SyntaxError: missing ) after argument list
+var pk;
+undefined
+var sk
+undefined
+var sk;
+undefined
+KeyHelper.generateIdentityKeyPair().then(function(identityKeyPair) { 
+    pk = identityKeyPair.pubKey;
+}
+VM115:3 Uncaught SyntaxError: missing ) after argument list
+KeyHelper.generateIdentityKeyPair().then(function(identityKeyPair) { 
+    pk = identityKeyPair;
+}
+VM119:3 Uncaught SyntaxError: missing ) after argument list
+KeyHelper.generateIdentityKeyPair().then(function(identityKeyPair) { 
+    pk = identityKeyPair;
+});
+Promise {<resolved>: undefined}
+pk
+{pubKey: ArrayBuffer(33), privKey: ArrayBuffer(32)}
+var idKeyA = pk;
+undefined
+idKeyA.pubKey
+ArrayBuffer(33) {}[[Int8Array]]: Int8Array(33) [5, 45, 65, 103, 125, 28, -54, 56, 46, 39, 3, 7, 4, -59, 112, -124, 121, -88, 8, 52, 41, -7, -56, -106, 29, -115, -120, -14, -32, -82, -71, 100, 113][[Uint8Array]]: Uint8Array(33) [5, 45, 65, 103, 125, 28, 202, 56, 46, 39, 3, 7, 4, 197, 112, 132, 121, 168, 8, 52, 41, 249, 200, 150, 29, 141, 136, 242, 224, 174, 185, 100, 113]byteLength: (...)__proto__: ArrayBuffer
+var preKey;
+undefined
+KeyHelper.generatePreKey(keyId).then(function(preKey) {
+}
+VM188:2 Uncaught SyntaxError: missing ) after argument list
+KeyHelper.generatePreKey(2018).then(function(preKey) {
+}
+VM191:2 Uncaught SyntaxError: missing ) after argument list
+KeyHelper.generatePreKey(2018).then(function(preKey) {
+}
+VM192:2 Uncaught SyntaxError: missing ) after argument list
+KeyHelper.generatePreKey(2018).then(function(preKey) {
+}
+VM195:2 Uncaught SyntaxError: missing ) after argument list
+KeyHelper.generatePreKey(2018).then(function(preK) {
+preKey = preK;});
+Promise {<resolved>: undefined}
+preKey
+{keyId: 2018, keyPair: {…}}keyId: 2018keyPair: privKey: ArrayBuffer(32) {}pubKey: ArrayBuffer(33)[[Int8Array]]: Int8Array(33) [5, -85, -90, 16, 54, -96, 44, -126, 18, 38, 45, -121, 38, -71, 105, 115, -56, -19, -30, 107, -28, 81, 62, 11, 47, -109, 49, -70, 89, -86, 87, -39, 80][[Uint8Array]]: Uint8Array(33) [5, 171, 166, 16, 54, 160, 44, 130, 18, 38, 45, 135, 38, 185, 105, 115, 200, 237, 226, 107, 228, 81, 62, 11, 47, 147, 49, 186, 89, 170, 87, 217, 80]byteLength: (...)__proto__: ArrayBuffer__proto__: Object__proto__: Object
+var signedPreKey;
+undefined
+KeyHelper.generateSignedPreKey(identityKeyPair, 2018).then(function(signedPreK){
+    signedPreKey = signedPreK;
+});
+VM227:1 Uncaught ReferenceError: identityKeyPair is not defined
+    at <anonymous>:1:32
+(anonymous) @ VM227:1
+KeyHelper.generateSignedPreKey(pk, 2018).then(function(signedPreK){
+    signedPreKey = signedPreK;
+});
+Promise {<resolved>: undefined}
+signedPreKey
+{keyId: 2018, keyPair: {…}, signature: ArrayBuffer(64)}keyId: 2018keyPair: privKey: ArrayBuffer(32)[[Int8Array]]: Int8Array(32) [56, 3, 114, -117, -96, 122, 106, -19, 82, 55, -123, 31, -12, 42, 101, -70, 119, -28, 117, 50, -4, -19, 30, 39, -106, 46, -29, 52, 74, -116, -104, 92][[Int16Array]]: Int16Array(16) [824, -29838, 31392, -4758, 14162, 8069, 10996, -17819, -7049, 12917, -4612, 10014, 11926, 13539, -29622, 23704][[Int32Array]]: Int32Array(8) [-1955462344, -311788896, 528824146, -1167774988, 846586999, 656338428, 887303830, 1553501258][[Uint8Array]]: Uint8Array(32) [56, 3, 114, 139, 160, 122, 106, 237, 82, 55, 133, 31, 244, 42, 101, 186, 119, 228, 117, 50, 252, 237, 30, 39, 150, 46, 227, 52, 74, 140, 152, 92]byteLength: (...)__proto__: ArrayBufferpubKey: ArrayBuffer(33) {}__proto__: Objectsignature: ArrayBuffer(64) {}__proto__: Object
+

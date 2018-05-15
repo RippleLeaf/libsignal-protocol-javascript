@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<!-- <html> -->
+<html ng-app="messengerApp">
+<head>
+  <title></title>
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.0.4/css/bootstrap-combined.min.css">
+
+<script type="text/javascript" src="InMemorySignalProtocolStore.js"></script>
+<script type="text/javascript" src="test_setup.js"></script>
+<script type="text/javascript" src="../dist/libsignal-protocol.js">
+// test code.
+var alice;
+var bob;
+
+Promise.all(
+    [initClient("CS.6431", 6431), initClient("May.12", 2018)]).
+then(function(users){
+    alice = users[0];
+    bob = users[1];
+    console.log(alice);
+    console.log(bob);
+    return buildSession(alice, bob);
+}).then(function onsuccess() {
+    var plaintext = "Hello world";
+    return newEncrypt(alice, bob, plaintext);
+}).then(function(ciphertext) {
+    // Bob receiving
+    return newDecrypt(alice, bob, ciphertext);
+}).then(function(plaintext) {
+    var str = dcodeIO.ByteBuffer.wrap(plaintext, "utf8").toString("utf8");
+    console.log(str);
+}).catch(function(error) {
+    console.log(error);
+}).then(function () {
+    return doEncrypt(bob, alice, "Hello 2nd world");
+}).then(function (ciphertext) {
+    return doDecrypt(bob, alice, ciphertext);
+}).then(function(plaintext) {
+    var str = dcodeIO.ByteBuffer.wrap(plaintext, "utf8").toString("utf8");
+    console.log(str);
+}).then(function () {
+    return doEncrypt(alice, bob, "Hello 3rd world");
+}).then(function (ciphertext) {
+    return doDecrypt(alice, bob, ciphertext);
+}).then(function(plaintext) {
+    var str = dcodeIO.ByteBuffer.wrap(plaintext, "utf8").toString("utf8");
+    console.log(str);
+});
+
+</script>
+</head>
+<body>
+
+
+
+<div ng-controller="MsgController as messenger">
+  <div align="left">
+    <h2>Alice</h2>
+    <form ng-submit="messenger.keyGen('Alice', 'CS.6431', 6431)">
+      <input class="btn-primary" type="submit" value="keyGen">
+    </form>
+
+    <form ng-submit="messenger.send('Alice', 'Bob')">
+      <input type="text" ng-model="messenger.aliceMsg"  size="30"
+             placeholder="type message here">
+      <input class="btn-primary" type="submit" value="Send to Bob">
+    </form>
+  </div>
+
+  <div align="right">
+    <h2>Bob</h2>
+    <form ng-submit="messenger.keyGen('Bob', 'May.12', 2018)">
+      <input class="btn-primary" type="submit" value="keyGen">
+    </form>
+
+    <form ng-submit="messenger.send('Bob', 'Alice')">
+      <input type="text" ng-model="messenger.bobMsg"  size="30"
+             placeholder="type message here">
+      <input class="btn-primary" type="submit" value="Send to Alice">
+    </form>
+  </div>
+
+  <h2>Messages</h2>
+  <ul class="unstyled">
+    <li ng-repeat="msg in messenger.plaintexts">
+      <div align="{{msg.align}}">{{msg.sender}}: {{msg.text}}</div>
+    </li>
+  </ul>
+</div>
+
+
+</body>
+</html>
