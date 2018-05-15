@@ -289,7 +289,7 @@ var server = function(){
 
 
 angular.module('messengerApp', [])
-  .controller('MsgController', function() {
+  .controller('MsgController', function($scope) {
     var globalStorage = {};
     var messengerServer = new MessengerServer();
     var messenger = this;
@@ -338,6 +338,7 @@ angular.module('messengerApp', [])
           align: plaintextAlign
         });
         console.log(plaintext);
+        $scope.$apply();
         // draw receiver...
       }).then(function () {
         // Report last message
