@@ -36330,14 +36330,12 @@ SessionCipher.prototype = {
             Internal.verifyMAC(commitment, macKey, mac, 32)
         ]);
     }).then(function (ret){
-        console.log(ret);
         return {
             header: ret[3],
             body: ret[0],
             commitKey: ret[1],
             commitment: ret[2],
         };
-        // return ret[0];
     });
   },
   fillMessageKeys: function(chain, counter) {

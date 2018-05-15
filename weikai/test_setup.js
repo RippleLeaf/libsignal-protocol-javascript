@@ -85,6 +85,16 @@ function doEncrypt(sender, rcver, plaintext) {
 }
 
 
+
+//-----------------------------------------------
+// Return a struct:
+// {
+//     header: 'H (ArrayBuffer)',
+//     body: 'M (ArrayBuffer)',
+//     commitKey: 'Kf (ArrayBuffer)',
+//     commitment: 'C2 (ArrayBuffer)',
+// }
+//-----------------------------------------------
 function newDecrypt(sender, rcver, ciphertext) {
   var address = new libsignal.SignalProtocolAddress(sender.identifier, sender.keyId);
   var sessionCipher = new libsignal.SessionCipher(rcver.store, address);
@@ -94,12 +104,6 @@ function newDecrypt(sender, rcver, ciphertext) {
         console.log(ret);
         return ret;
     });
-  // return {
-  //     header: 'H (ArrayBuffer)',
-  //     body: 'M (ArrayBuffer)',
-  //     commitKey: 'Kf (ArrayBuffer)',
-  //     commitment: 'C2 (ArrayBuffer)',
-  // };
 }
 
 function doDecrypt(sender, rcver, ciphertext) {
@@ -109,12 +113,6 @@ function doDecrypt(sender, rcver, ciphertext) {
         console.log(ret);
         return ret;
     });
-  // return {
-  //     header: 'H (ArrayBuffer)',
-  //     body: 'M (ArrayBuffer)',
-  //     commitKey: 'Kf (ArrayBuffer)',
-  //     commitment: 'C2 (ArrayBuffer)',
-  // };
 }
 
 //-----------------------------------------------
@@ -252,39 +250,39 @@ function MessengerServer() {
 
 }
 
-var server = function(){
-  var secretKey;
-  var userList = {};
+// var server = function(){
+//   var secretKey;
+//   var userList = {};
 
-  init = function() {
-    //TODO: generate random symmetric key
-    secretKey = "testkey"
-  }
+//   init = function() {
+//     //TODO: generate random symmetric key
+//     secretKey = "testkey"
+//   }
 
-  signMessage = function(sender, rcver, msg){
-    var evidence;
+//   signMessage = function(sender, rcver, msg){
+//     var evidence;
 
-    if (msg.type == 1){
-      buffer = dcodeIO.ByteBuffer.wrap(msg.body, 'binary').toArrayBuffer(); 
-    }
-    if (msg.type == 3){
-      var buffer = dcodeIO.ByteBuffer.wrap(msg.body, 'binary'); // PrekeyMsg
-      var version = buffer.readUint8();
-    }
-    // TODO: sign on evidence (sender || rcver || C2)
-    Internal.crypto.sign(key, byteArray.buffer).then(
-      );
-    msg.evidence = evidence;
-  }
+//     if (msg.type == 1){
+//       buffer = dcodeIO.ByteBuffer.wrap(msg.body, 'binary').toArrayBuffer(); 
+//     }
+//     if (msg.type == 3){
+//       var buffer = dcodeIO.ByteBuffer.wrap(msg.body, 'binary'); // PrekeyMsg
+//       var version = buffer.readUint8();
+//     }
+//     // TODO: sign on evidence (sender || rcver || C2)
+//     Internal.crypto.sign(key, byteArray.buffer).then(
+//       );
+//     msg.evidence = evidence;
+//   }
 
-  report = function(reporter, sender, msg, keyF, evidence){
-    //TODO: check if evidence is correctly signed
+//   report = function(reporter, sender, msg, keyF, evidence){
+//     //TODO: check if evidence is correctly signed
 
-    //TODO: recalculate C2', compare with C2
+//     //TODO: recalculate C2', compare with C2
 
-    //TODO: if all passed, return success
-  }
-}
+//     //TODO: if all passed, return success
+//   }
+// }
 // server.init();
 
 
@@ -308,12 +306,7 @@ angular.module('messengerApp', [])
     // Input the name of sender and receiver
     //-----------------------------------------------
     messenger.send = function(sender, rcver) {
-      // var textAlign = 'left';
-      var plaintext = messenger.aliceMsg;
-      if(sender == 'Bob'){
-        // textAlign = 'right';
-        plaintext = messenger.bobMsg;
-      }
+      var plaintext = messenger._getAndSetTextbox(sender, '');
       senderStorage = globalStorage[sender];
       rcverStorage = globalStorage[rcver];
       sendMessage(senderStorage, rcverStorage, plaintext)
@@ -339,23 +332,7 @@ angular.module('messengerApp', [])
             abuse: false,
             id: msgId,
         });
-
-        if(sender == 'Alice'){
-          messenger.aliceMsg = '';
-        }
-        else{
-          messenger.bobMsg = '';
-        }
         $scope.$apply();
-      // }).then(function () {
-      //   // Report last message
-      //   var history = rcverStorage.history[sender];
-      //   console.log(rcverStorage);
-      //   var evidence = history[history.length-1].evidence;
-      //   var mac = history[history.length-1].mac;
-      //   return messengerServer.reportAbuse(sender, rcver, evidence, mac).then(function (argument) {
-      //       console.log('reportAbuse() success');
-      //   });
       });
     };
 
@@ -385,6 +362,19 @@ angular.module('messengerApp', [])
         return angular.isString(s);
     };
 
+    messenger._getAndSetTextbox = function(sender, rcver) {
+      var plaintext;
+      if(sender == 'Alice'){
+        plaintext = messenger.aliceMsg;
+        messenger.aliceMsg = '';
+      }
+      else{
+        plaintext = messenger.bobMsg;
+        messenger.bobMsg = '';
+      }
+      return plaintext;
+    };
+
   });
 
 
@@ -393,27 +383,3 @@ Copyright 2018 Google Inc. All Rights Reserved.
 Use of this source code is governed by an MIT-style license that
 can be found in the LICENSE file at http://angular.io/license
 */
-
-
-    // messenger.sendOld = function(sender, rcver) {
-    //   var textAlign = 'left';
-    //   var plaintext = messenger.aliceMsg;
-    //   if(sender == 'Bob'){
-    //     textAlign = 'right';
-    //     plaintext = messenger.bobMsg;
-    //   }
-    //   console.log(messenger.sender);
-    //   messenger.plaintexts.push({
-    //       text: plaintext,
-    //       sender: sender, 
-    //       align: textAlign});
-    //   if(sender == 'Alice'){
-    //     messenger.aliceMsg = '';
-    //   }
-    //   else{
-    //     messenger.bobMsg = '';
-    //   }
-    // };
-
-    //TODO: listener to report button
-
