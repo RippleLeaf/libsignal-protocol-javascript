@@ -1,12 +1,3 @@
-<!-- 
-Bug: Illegal wire type
-libsignal-protocol.js:33535
-Uncaught (in promise) Error: 
-Illegal wire type for field Message.Field .textsecure.WhisperMessage.ephemeralKey: 0 (2 expected)
-1. Both keyGen
-2. Alice sends to Bob twice
- -->
-
 <!DOCTYPE html>
 <!-- <html> -->
 <html ng-app="messengerApp">
@@ -95,7 +86,12 @@ then(function(users){
   <h2>Messages</h2>
   <ul class="unstyled">
     <li ng-repeat="msg in messenger.plaintexts">
-      <div align="{{msg.align}}">{{msg.sender}}: {{msg.text}}</div>
+      <div align="{{msg.align}}">
+        {{msg.sender}}: {{msg.text}}
+        <form ng-submit="messenger.reportAbuse(msg.sender, msg.rcver, msg.text)">
+          <input class="btn-primary" type="submit" value="report abuse">
+        </form>
+      </div>
     </li>
   </ul>
 </div>
