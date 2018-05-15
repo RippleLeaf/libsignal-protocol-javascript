@@ -181,10 +181,7 @@ function receiveMessage(sender, rcver, ciphertext) {
     rcver.handShake[sender.name] = true;
 
     var beginTime = new Date().getTime();
-    var dec = newDecrypt(sender, rcver, ciphertext).then(function (evidence) {
-        _pushHistory(rcver, sender.name, evidence, ciphertext.mac);
-        return evidence.body;
-    });
+    var dec = newDecrypt(sender, rcver, ciphertext);
     var endTime = new Date().getTime();
     console.log("run time of decryption: " + (endTime - beginTime));
     var ret = [endTime - beginTime, dec]
@@ -199,10 +196,7 @@ function receiveMessage(sender, rcver, ciphertext) {
     // console.log('doDecrypt');
 
     var beginTime = new Date().getTime();
-    var dec = doDecrypt(sender, rcver, ciphertext).then(function (evidence) {
-        _pushHistory(rcver, sender.name, evidence, ciphertext.mac);
-        return evidence.body;
-    });
+    var dec = doDecrypt(sender, rcver, ciphertext);
     var endTime = new Date().getTime();
     console.log("run time of decryption: " + (endTime - beginTime));
     var ret = [endTime - beginTime, dec]
@@ -332,30 +326,16 @@ angular.module('messengerApp', [])
         console.log(package[0]);
         messenger.encryptionTime = package[0];
         return package[1];
-      }).then(function(ciphertext){
-        var beginTime = new Date().getTime();
-        var sig = messengerServer.signMessage(ciphertext);
-        var endTime = new Date().getTime();
-        messenger.signTime = endTime - beginTime;
-        return sig;
-      }).then(function (signedCipher) {
-        console.log(signedCipher);
-        return receiveMessage(senderStorage, rcverStorage, signedCipher);
+      }).then(function (ciphertext) {
+        return receiveMessage(senderStorage, rcverStorage, ciphertext);
       }).then(function (package) {
+        console.log(package);
         messenger.decryptionTime = package[0];
         return package[1];
       }).then(function (plaintext) {
+        console.log(plaintext);
         return dcodeIO.ByteBuffer.wrap(plaintext, "utf8").toString("utf8");
-      }).then(function () {
-        // Report last message
-        var history = rcverStorage.history[sender];
-        // console.log(rcverStorage);
-        var evidence = history[history.length-1].evidence;
-        var mac = history[history.length-1].mac;
-        return messengerServer.reportAbuse(sender, recvr, evidence, mac).then(function (argument) {
-            console.log('reportAbuse() success');
-        });
-      });
+      })
     };
 
     //-----------------------------------------------
@@ -372,7 +352,11 @@ angular.module('messengerApp', [])
       rcverStorage = globalStorage[rcver];
       sendMessage(senderStorage, rcverStorage, plaintext)
       .then(function (ciphertext) {
-        return messengerServer.signMessage(ciphertext);
+        var beginTime = new Date.getIme();
+        var sig = messengerServer.signMessage(ciphertext);
+        var endTime = new Date.getIme();
+        messenger.signTime = endTime - beginTime;
+        return sig;
       }).then(function (signedCipher) {
         console.log(signedCipher);
         return receiveMessage(senderStorage, rcverStorage, signedCipher);
