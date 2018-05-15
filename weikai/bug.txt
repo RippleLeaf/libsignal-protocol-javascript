@@ -1,0 +1,12 @@
+
+* Issue: Illegal wire type
+* Status: fixed
+* Line: libsignal-protocol.js:33535
+* Error message:
+  Uncaught (in promise) Error: 
+  Illegal wire type for field Message.Field .textsecure.WhisperMessage.ephemeralKey: 0 (2 expected)
+* Reproduce:
+  1. Both keyGen
+  2. Alice sends to Bob twice
+* Fix: refined control flow at buildSession, newEncrypt, newDecrypt
+

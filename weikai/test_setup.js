@@ -226,12 +226,16 @@ function MessengerClient() {
     var they = rcverId.identifier;
     // if the sender hasn't shaked hands with the rcv
     // build a new session
-    if(our.handShake[they] == undefined || our.handShake[they] == false){
+    if(our.handShake[they] == undefined){
       our.handShake[they] = false;
       return buildSession(our, rcverId).then(function onsuccess() {
         // console.log('newEncrypt');
         return newEncrypt(our, rcverId, plaintext);
       });
+    }
+    if(our.handShake[they] == false){
+      // console.log('newEncrypt');
+      return newEncrypt(our, rcverId, plaintext);
     }
     else{
       // console.log('doEncrypt');
@@ -246,7 +250,7 @@ function MessengerClient() {
   this.receiveMessage = function (senderId, signedCipher) {
     var our = this.userProfile;
     var they = senderId.identifier;
-    if(our.handShake[they] == undefined){
+    if(our.handShake[they] == undefined || signedCipher.type == 3){
       // console.log('newDecrypt');
       our.handShake[they] = true;
       return newDecrypt(senderId, our, signedCipher).then(function (evidence) {
@@ -380,6 +384,7 @@ angular.module('messengerApp', [])
     };
 
   });
+
 
 
 /*
