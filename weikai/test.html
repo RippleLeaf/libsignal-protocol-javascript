@@ -4,8 +4,12 @@
 <head>
   <title></title>
 
+<!-- AngularJS framework, for UI controller -->
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<!-- CSS styles -->
 <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.0.4/css/bootstrap-combined.min.css">
+<!-- Icons -->
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
 
 <script type="text/javascript" src="InMemorySignalProtocolStore.js"></script>
 <script type="text/javascript" src="test_setup.js"></script>
@@ -87,8 +91,9 @@ then(function(users){
   <ul class="unstyled">
     <li ng-repeat="msg in messenger.plaintexts">
       <div align="{{msg.align}}">
+        <i class="fas {{msg.abuse ? 'fa-ban' : 'fa-check'}}"></i>
         {{msg.sender}}: {{msg.text}}
-        <form ng-submit="messenger.reportAbuse(msg.sender, msg.rcver, msg.text)">
+        <form ng-submit="messenger.reportAbuse(msg.sender, msg.rcver, msg.id)">
           <input class="btn-primary" type="submit" value="report abuse">
         </form>
       </div>

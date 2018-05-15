@@ -150,6 +150,7 @@ function _pushHistory(useProfile, contact, evidence, mac) {
     useProfile.history[contact] = [];
   }
   useProfile.history[contact].push({evidence: evidence, mac: mac});
+  return useProfile.history[contact].length - 1;
 }
 
 
@@ -166,8 +167,8 @@ function receiveMessage(sender, rcver, ciphertext) {
     // console.log('newDecrypt');
     rcver.handShake[sender.name] = true;
     return newDecrypt(sender, rcver, ciphertext).then(function (evidence) {
-        _pushHistory(rcver, sender.name, evidence, ciphertext.mac);
-        return evidence.body;
+        var msgId = _pushHistory(rcver, sender.name, evidence, ciphertext.mac);
+        return [evidence.body, msgId];
     });
   }
   else{
@@ -175,8 +176,8 @@ function receiveMessage(sender, rcver, ciphertext) {
     // console.log('doDecrypt');
 
     return doDecrypt(sender, rcver, ciphertext).then(function (evidence) {
-        _pushHistory(rcver, sender.name, evidence, ciphertext.mac);
-        return evidence.body;
+        var msgId = _pushHistory(rcver, sender.name, evidence, ciphertext.mac);
+        return [evidence.body, msgId];
     });
   }
 }
@@ -324,36 +325,60 @@ angular.module('messengerApp', [])
       }).then(function (signedCipher) {
         console.log(signedCipher);
         return receiveMessage(senderStorage, rcverStorage, signedCipher);
-      }).then(function (plaintext) {
-        return dcodeIO.ByteBuffer.wrap(plaintext, "utf8").toString("utf8");
-      }).then(function (plaintext) {
-        //TODO: check if the evidence is 
-
-        //TODO: store the signed evidence for reporting in future
-        var plaintextAlign = sender == 'Bob'? 'left' : 'right';
-        messenger.plaintexts.push({
-          text: plaintext,
-          sender: sender, 
-          rcver: rcver,
-          align: plaintextAlign
-        });
+      }).then(function (result) {
+        var plaintext = result[0], msgId = result[1];
+        plaintext = dcodeIO.ByteBuffer.wrap(plaintext, "utf8").toString("utf8");
         console.log(plaintext);
-        $scope.$apply();
-        // draw receiver...
-      }).then(function () {
-        // Report last message
-        var history = rcverStorage.history[sender];
-        console.log(rcverStorage);
-        var evidence = history[history.length-1].evidence;
-        var mac = history[history.length-1].mac;
-        return messengerServer.reportAbuse(sender, rcver, evidence, mac).then(function (argument) {
-            console.log('reportAbuse() success');
+
+        var plaintextAlign = (sender == 'Bob'? 'left' : 'right');
+        messenger.plaintexts.push({
+            text: plaintext,
+            sender: sender, 
+            rcver: rcver,
+            align: plaintextAlign,
+            abuse: false,
+            id: msgId,
         });
+
+        if(sender == 'Alice'){
+          messenger.aliceMsg = '';
+        }
+        else{
+          messenger.bobMsg = '';
+        }
+        $scope.$apply();
+      // }).then(function () {
+      //   // Report last message
+      //   var history = rcverStorage.history[sender];
+      //   console.log(rcverStorage);
+      //   var evidence = history[history.length-1].evidence;
+      //   var mac = history[history.length-1].mac;
+      //   return messengerServer.reportAbuse(sender, rcver, evidence, mac).then(function (argument) {
+      //       console.log('reportAbuse() success');
+      //   });
       });
     };
 
-    messenger.reportAbuse = function(sender, rcver, index){
-      console.log("report!!!")
+    messenger.reportAbuse = function(sender, rcver, msgId){
+      if (!globalStorage[rcver] || !globalStorage[rcver].history ||
+         !globalStorage[rcver].history[sender]) {
+          throw new Error('reportAbuse: not found ' + sender + ' in history');
+      }
+      var history = globalStorage[rcver].history[sender];
+      console.log(history);
+      if (!history[msgId]) {
+          throw new Error('reportAbuse: not found message ID' + msgId + ' in history');
+      }
+      var evidence = history[msgId].evidence;
+      var mac = history[msgId].mac;
+      var index = messenger.plaintexts.findIndex(function (element) {
+        return (element.id == msgId && element.rcver == rcver);
+      });
+      return messengerServer.reportAbuse(sender, rcver, evidence, mac).then(function () {
+          console.log('reportAbuse() success');
+          messenger.plaintexts[index].abuse = true;
+          $scope.$apply();
+      });
     }
 
     messenger.isString = function(s) {
