@@ -233,7 +233,6 @@ function MessengerClient() {
         this.userProfile = user;
         this.userProfile.name = name;
         this.userProfile.handShake = [];
-        // globalStorage[sender] = user;
         console.log(this.userProfile);
         return user.publicId;
     }.bind(this));
@@ -320,7 +319,6 @@ function MessengerClient() {
 
 angular.module('messengerApp', [])
   .controller('MsgController', function($scope) {
-    var globalStorage = {};
     var messengerServer = new MessengerServer();
     var clients = {
         Alice: new MessengerClient(),
