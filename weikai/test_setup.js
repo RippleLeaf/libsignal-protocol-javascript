@@ -62,6 +62,10 @@ function getPublicId(user) {
   return ret;
 }
 
+//-----------------------------------------------
+// Build a new session to perfrom the first encryption.
+// Return a Promise of SessionCipher.
+//-----------------------------------------------
 function buildSession(sender, rcverId){ 
   var address = new libsignal.SignalProtocolAddress(rcverId.identifier, rcverId.keyId);
   var sessionBuilder = new libsignal.SessionBuilder(sender.store, address);
@@ -111,8 +115,10 @@ function doDecrypt(sender, rcver, ciphertext) {
 
 
 //-----------------------------------------------
-// Generate the secret key of the server
-// Return Promise of server setting.
+// MessengerServer: 
+// * Get/set Public IDs of clients
+// * Sign ciphertext
+// * Verify report of abuse
 //-----------------------------------------------
 function MessengerServer() {
   this.secretKey = Uint8Array.from(
@@ -188,6 +194,12 @@ function MessengerServer() {
 }
 
 
+//-----------------------------------------------
+// Messenger Client:
+// * Send plaintext
+// * Receive signed ciphertext
+// * Generate report of abuse
+//-----------------------------------------------
 function MessengerClient() {
   this.userProfile;
 
@@ -284,6 +296,12 @@ function MessengerClient() {
 }
 
 
+//-----------------------------------------------
+// Message Controller
+// 1. Init server and clients
+// 2. Forward messages between server and clients (like network)
+// 3. Display UI
+//-----------------------------------------------
 angular.module('messengerApp', [])
   .controller('MsgController', function($scope) {
     var messengerServer = new MessengerServer();
