@@ -288,7 +288,7 @@ function MessengerServer() {
 var testCount = 0;
 
 angular.module('messengerApp', [])
-  .controller('MsgController', function() {
+  .controller('MsgController', function($scope) {
     var globalStorage = {};
     var messengerServer = new MessengerServer();
     var messenger = this;
@@ -343,6 +343,7 @@ angular.module('messengerApp', [])
         return receiveMessage(senderStorage, rcverStorage, signedCipher);
       }).then(function (package) {
         messenger.decryptionTime = package[0];
+        $scope.$apply();
         return package[1];
       }).then(function (plaintext) {
         return dcodeIO.ByteBuffer.wrap(plaintext, "utf8").toString("utf8");
