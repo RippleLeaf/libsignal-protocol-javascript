@@ -103,14 +103,18 @@ function newDecrypt(sender, rcver, ciphertext) {
 }
 
 function doDecrypt(sender, rcver, ciphertext) {
-  // var address = new libsignal.SignalProtocolAddress(sender.identifier, sender.keyId);
-  // return rcver.sessionCipher.decryptWhisperMessage(ciphertext.body, "binary");
-  return {
-      header: 'H (ArrayBuffer)',
-      body: 'M (ArrayBuffer)',
-      commitKey: 'Kf (ArrayBuffer)',
-      commitment: 'C2 (ArrayBuffer)',
-  };
+  var address = new libsignal.SignalProtocolAddress(sender.identifier, sender.keyId);
+  return rcver.sessionCipher.decryptWhisperMessage(ciphertext.body, "binary").
+    then(function (ret) {
+        console.log(ret);
+        return ret;
+    });
+  // return {
+  //     header: 'H (ArrayBuffer)',
+  //     body: 'M (ArrayBuffer)',
+  //     commitKey: 'Kf (ArrayBuffer)',
+  //     commitment: 'C2 (ArrayBuffer)',
+  // };
 }
 
 //-----------------------------------------------
@@ -166,6 +170,41 @@ function receiveMessage(sender, rcver, ciphertext) {
 // Generate the secret key of the server
 // Return Promise of server setting.
 //-----------------------------------------------
+function MessengerServer() {
+  this.secretKey = Uint8Array.from(
+          [192,106,86,38,22,204,187,56,111,79,114,168,231,35,161,164,
+          183,157,252,75,64,170,31,171,79,231,209,78,242,130,15,51]);
+  this.userList = {};
+  this._getCommitment = function (ciphertext) {
+    var buffer = dcodeIO.ByteBuffer.wrap(ciphertext.body, 'binary').toArrayBuffer();
+    var msgLen = buffer.byteLength;
+    return buffer.slice(msgLen - 32);
+  };
+  //---------------------------------------------
+  // Sign (or add MAC) to cihper message, 
+  // then relay both chiper message and MAC.
+  //---------------------------------------------
+  this.signMessage = function (ciphertext) {
+    var com = this._getCommitment(ciphertext);
+    return this.calcHmac(com).then(function (mac) {
+        ciphertext.mac = mac;
+        return ciphertext;
+    });
+  };
+
+  this.calcHmac = function (data) {
+    var crypto = window.crypto;
+    if (!crypto || !crypto.subtle || typeof crypto.getRandomValues !== 'function') {
+        throw new Error('WebCrypto not found');
+    }
+    return crypto.subtle.importKey(
+        'raw', this.secretKey.buffer, {name: 'HMAC', hash: {name: 'SHA-256'}}, false, ['sign']).
+    then(function (key) {
+        return crypto.subtle.sign( {name: 'HMAC', hash: 'SHA-256'}, key, data);
+    });
+  };
+}
+
 var server = function(){
   var secretKey;
   var userList = {};
@@ -199,13 +238,14 @@ var server = function(){
     //TODO: if all passed, return success
   }
 }
-server.init();
+// server.init();
 
 
 
 angular.module('messengerApp', [])
   .controller('MsgController', function() {
     var globalStorage = {};
+    var messengerServer = new MessengerServer();
     var messenger = this;
     messenger.plaintexts = [];
 
@@ -234,9 +274,12 @@ angular.module('messengerApp', [])
         // draw sender...
         //TODO: ask server to sign C2
         console.log(ciphertext);
-        return receiveMessage(senderStorage, rcverStorage, ciphertext);
+        return messengerServer.signMessage(ciphertext);
+      }).then(function (signedCipher) {
+        console.log(signedCipher);
+        return receiveMessage(senderStorage, rcverStorage, signedCipher);
       }).then(function (plaintext) {
-          return dcodeIO.ByteBuffer.wrap(plaintext, "utf8").toString("utf8");
+        return dcodeIO.ByteBuffer.wrap(plaintext.body, "utf8").toString("utf8");
       }).then(function (plaintext) {
         //TODO: check if the evidence is 
 
