@@ -1,6 +1,4 @@
 
-
-
 //-----------------------------------------------
 // Generate User Profile, including IDs, public and private key pairs,
 // and signature, which is a custom struct.
@@ -189,45 +187,14 @@ function MessengerServer() {
 
 }
 
-// var server = function(){
-//   var secretKey;
-//   var userList = {};
-
-//   init = function() {
-//     //TODO: generate random symmetric key
-//     secretKey = "testkey"
-//   }
-
-//   signMessage = function(sender, rcver, msg){
-//     var evidence;
-
-//     if (msg.type == 1){
-//       buffer = dcodeIO.ByteBuffer.wrap(msg.body, 'binary').toArrayBuffer(); 
-//     }
-//     if (msg.type == 3){
-//       var buffer = dcodeIO.ByteBuffer.wrap(msg.body, 'binary'); // PrekeyMsg
-//       var version = buffer.readUint8();
-//     }
-//     // TODO: sign on evidence (sender || rcver || C2)
-//     Internal.crypto.sign(key, byteArray.buffer).then(
-//       );
-//     msg.evidence = evidence;
-//   }
-
-//   report = function(reporter, sender, msg, keyF, evidence){
-//     //TODO: check if evidence is correctly signed
-
-//     //TODO: recalculate C2', compare with C2
-
-//     //TODO: if all passed, return success
-//   }
-// }
-// server.init();
-
 
 function MessengerClient() {
   this.userProfile;
 
+//-----------------------------------------------
+// Init client, generate IDs and keys.
+// Return Promise of Public ID.
+//-----------------------------------------------
   this.init = function (name, identifier, keyId) {
     return initClient(identifier, keyId).then(function (user){
         this.userProfile = user;
