@@ -64,13 +64,11 @@ function getPublicId(user) {
   return ret;
 }
 
-
-function buildSession(sender, rcver){ 
-  var address = new libsignal.SignalProtocolAddress(rcver.identifier, rcver.keyId);
+function buildSession(sender, rcverId){ 
+  var address = new libsignal.SignalProtocolAddress(rcverId.identifier, rcverId.keyId);
   var sessionBuilder = new libsignal.SessionBuilder(sender.store, address);
-  return sessionBuilder.processPreKey(rcver.publicId);
+  return sessionBuilder.processPreKey(rcverId);
 }
-
 
 function newEncrypt(sender, rcver, plaintext) {
   var address = new libsignal.SignalProtocolAddress(rcver.identifier, rcver.keyId);
@@ -83,8 +81,6 @@ function doEncrypt(sender, rcver, plaintext) {
   var address = new libsignal.SignalProtocolAddress(rcver.identifier, rcver.keyId);
   return sender.sessionCipher.encrypt(plaintext);
 }
-
-
 
 //-----------------------------------------------
 // Return a struct:
@@ -115,72 +111,6 @@ function doDecrypt(sender, rcver, ciphertext) {
     });
 }
 
-//-----------------------------------------------
-// Send encrypted message. Build a new session if not exist.
-// Return Promise of a ciphertext.
-//-----------------------------------------------
-function sendMessage(sender, rcver, plaintext) {
-  if(sender.handShake == undefined){
-    sender.handShake = [];
-  }
-  // if the sender hasn't shaked hands with the rcv
-  // build a new session
-
-  if(sender.handShake[rcver.name] == undefined ||
-      sender.handShake[rcver.name] == false){
-    sender.handShake[rcver.name] = false;
-    return buildSession(sender, rcver).then(function onsuccess() {
-      // console.log('newEncrypt');
-      return newEncrypt(sender, rcver, plaintext);
-    });
-  }
-  else{
-    // console.log('doEncrypt');
-    return doEncrypt(sender, rcver, plaintext);
-  }
-}
-
-function _pushHistory(useProfile, contact, evidence, mac) {
-  if(useProfile.history == undefined){
-    useProfile.history = {};
-  }
-  if(useProfile.history[contact] == undefined){
-    useProfile.history[contact] = [];
-  }
-  useProfile.history[contact].push({evidence: evidence, mac: mac});
-  return useProfile.history[contact].length - 1;
-}
-
-
-//-----------------------------------------------
-// Receive encrypted message. Build a new session if not exist.
-// Return Promise of a plaintext.
-//-----------------------------------------------
-function receiveMessage(sender, rcver, ciphertext) {
-  if(rcver.handShake == undefined){
-    rcver.handShake = [];
-  }
-
-  if(rcver.handShake[sender.name] == undefined){
-    // console.log('newDecrypt');
-    rcver.handShake[sender.name] = true;
-    return newDecrypt(sender, rcver, ciphertext).then(function (evidence) {
-        var msgId = _pushHistory(rcver, sender.name, evidence, ciphertext.mac);
-        return [evidence.body, msgId];
-    });
-  }
-  else{
-    rcver.handShake[sender.name] = true;
-    // console.log('doDecrypt');
-
-    return doDecrypt(sender, rcver, ciphertext).then(function (evidence) {
-        var msgId = _pushHistory(rcver, sender.name, evidence, ciphertext.mac);
-        return [evidence.body, msgId];
-    });
-  }
-}
-
-
 
 //-----------------------------------------------
 // Generate the secret key of the server
@@ -190,7 +120,16 @@ function MessengerServer() {
   this.secretKey = Uint8Array.from(
           [192,106,86,38,22,204,187,56,111,79,114,168,231,35,161,164,
           183,157,252,75,64,170,31,171,79,231,209,78,242,130,15,51]);
-  this.userList = {};
+  this.clientPublicId = {};
+
+  this.setPublicId = function (client, publicId) {
+    this.clientPublicId[client] = publicId;
+  };
+
+  this.getPublicId = function (client) {
+    return this.clientPublicId[client];
+  };
+
   this._getCommitment = function (ciphertext) {
     var buffer = dcodeIO.ByteBuffer.wrap(ciphertext.body, 'binary').toArrayBuffer();
     var msgLen = buffer.byteLength;
@@ -286,19 +225,113 @@ function MessengerServer() {
 // server.init();
 
 
+function MessengerClient() {
+  this.userProfile;
+
+  this.init = function (name, identifier, keyId) {
+    return initClient(identifier, keyId).then(function (user){
+        this.userProfile = user;
+        this.userProfile.name = name;
+        this.userProfile.handShake = [];
+        // globalStorage[sender] = user;
+        console.log(this.userProfile);
+        return user.publicId;
+    }.bind(this));
+  };
+
+//-----------------------------------------------
+// Send encrypted message. Build a new session if not exist.
+// Return Promise of a ciphertext.
+//-----------------------------------------------
+  this.sendMessage = function (rcverId, plaintext) {
+    var our = this.userProfile;
+    var they = rcverId.identifier;
+    // if the sender hasn't shaked hands with the rcv
+    // build a new session
+    if(our.handShake[they] == undefined || our.handShake[they] == false){
+      our.handShake[they] = false;
+      return buildSession(our, rcverId).then(function onsuccess() {
+        // console.log('newEncrypt');
+        return newEncrypt(our, rcverId, plaintext);
+      });
+    }
+    else{
+      // console.log('doEncrypt');
+      return doEncrypt(our, rcverId, plaintext);
+    }
+  };
+
+//-----------------------------------------------
+// Receive encrypted message. Build a new session if not exist.
+// Return Promise of a [plaintext, message ID].
+//-----------------------------------------------
+  this.receiveMessage = function (senderId, signedCipher) {
+    var our = this.userProfile;
+    var they = senderId.identifier;
+    if(our.handShake[they] == undefined){
+      // console.log('newDecrypt');
+      our.handShake[they] = true;
+      return newDecrypt(senderId, our, signedCipher).then(function (evidence) {
+          var msgId = this._pushHistory(they, evidence, signedCipher.mac);
+          return [evidence.body, msgId];
+      }.bind(this));
+    }
+    else{
+      our.handShake[they] = true;
+      // console.log('doDecrypt');
+      return doDecrypt(senderId, our, signedCipher).then(function (evidence) {
+          var msgId = this._pushHistory(they, evidence, signedCipher.mac);
+          return [evidence.body, msgId];
+      }.bind(this));
+    }
+  };
+
+  this._pushHistory = function(contact, evidence, mac) {
+    var our = this.userProfile;
+    if(our.history == undefined){
+      our.history = {};
+    }
+    if(our.history[contact] == undefined){
+      our.history[contact] = [];
+    }
+    our.history[contact].push({evidence: evidence, mac: mac});
+    return our.history[contact].length - 1;
+  };
+
+  this.getAbuseReport = function (senderId, msgId) {
+    var our = this.userProfile;
+    var they = senderId.identifier;
+    if (!our.history || !our.history[they]) {
+        throw new Error('reportAbuse: not found ' + they + ' in history');
+    }
+    var history = our.history[they];
+    console.log(history);
+    if (!history[msgId]) {
+        throw new Error('reportAbuse: not found message ID' + msgId + ' in history');
+    }
+    var report = {
+        evidence: history[msgId].evidence,
+        mac: history[msgId].mac,
+    };
+    return report;
+  };
+}
+
 
 angular.module('messengerApp', [])
   .controller('MsgController', function($scope) {
     var globalStorage = {};
     var messengerServer = new MessengerServer();
+    var clients = {
+        Alice: new MessengerClient(),
+        Bob: new MessengerClient(),
+    };
     var messenger = this;
     messenger.plaintexts = [];
 
     messenger.keyGen = function(sender, identifier, keyId) {
-      initClient(identifier, keyId).then(function (user){
-          user.name = sender;
-          globalStorage[sender] = user;
-          console.log(user);
+      return clients[sender].init(sender, identifier, keyId).then(function (publicId) {
+          messengerServer.setPublicId(sender, publicId);
       });
     };
 
@@ -307,17 +340,13 @@ angular.module('messengerApp', [])
     //-----------------------------------------------
     messenger.send = function(sender, rcver) {
       var plaintext = messenger._getAndSetTextbox(sender, '');
-      senderStorage = globalStorage[sender];
-      rcverStorage = globalStorage[rcver];
-      sendMessage(senderStorage, rcverStorage, plaintext)
-      .then(function (ciphertext) {
-        // draw sender...
-        //TODO: ask server to sign C2
-        // console.log(ciphertext);
-        return messengerServer.signMessage(ciphertext);
+      clients[sender].sendMessage(messengerServer.getPublicId(rcver), plaintext).
+      then(function (ciphertext) {
+          return messengerServer.signMessage(ciphertext);
       }).then(function (signedCipher) {
-        console.log(signedCipher);
-        return receiveMessage(senderStorage, rcverStorage, signedCipher);
+          console.log(signedCipher);
+          return clients[rcver].receiveMessage(
+              messengerServer.getPublicId(sender), signedCipher);
       }).then(function (result) {
         var plaintext = result[0], msgId = result[1];
         plaintext = dcodeIO.ByteBuffer.wrap(plaintext, "utf8").toString("utf8");
@@ -337,22 +366,14 @@ angular.module('messengerApp', [])
     };
 
     messenger.reportAbuse = function(sender, rcver, msgId){
-      if (!globalStorage[rcver] || !globalStorage[rcver].history ||
-         !globalStorage[rcver].history[sender]) {
-          throw new Error('reportAbuse: not found ' + sender + ' in history');
-      }
-      var history = globalStorage[rcver].history[sender];
-      console.log(history);
-      if (!history[msgId]) {
-          throw new Error('reportAbuse: not found message ID' + msgId + ' in history');
-      }
-      var evidence = history[msgId].evidence;
-      var mac = history[msgId].mac;
-      var index = messenger.plaintexts.findIndex(function (element) {
-        return (element.id == msgId && element.rcver == rcver);
-      });
-      return messengerServer.reportAbuse(sender, rcver, evidence, mac).then(function () {
+      var senderId = messengerServer.getPublicId(sender);
+      var report = clients[rcver].getAbuseReport(senderId, msgId);
+      return messengerServer.reportAbuse('', '', report.evidence, report.mac).
+      then(function () {
           console.log('reportAbuse() success');
+          var index = messenger.plaintexts.findIndex(function (element) {
+              return (element.id == msgId && element.rcver == rcver);
+          });
           messenger.plaintexts[index].abuse = true;
           $scope.$apply();
       });
