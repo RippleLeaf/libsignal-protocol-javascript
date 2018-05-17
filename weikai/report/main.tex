@@ -1,0 +1,100 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\title{CS6431 Project Report}
+\author{Wei-kai Lin, Yue Guo}
+% \date{February 2018}
+
+\usepackage{natbib}
+% \usepackage{siunitx} % Provides the \SI{}{} and \si{} command for typesetting SI units
+\usepackage{graphicx} % Required for the inclusion of images
+\usepackage{natbib} % Required to change bibliography style to APA
+\usepackage{amsmath} % Required for some math elements 
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsmath,amsthm,amstext,amssymb,amsfonts,latexsym}
+\usepackage{verbatim}
+\usepackage{hyperref}
+\usepackage{geometry}
+% \geometry{left=3cm, right=3cm, top=3.5cm, bottom=3.5cm}
+\usepackage{comment}
+\usepackage{enumitem}
+\usepackage{color}
+
+\usepackage{pgfplots}
+\pgfplotsset{width = 5.9cm, compat=1.5}
+
+\definecolor{blue1}{rgb}{0.4,0.4,0.7}
+\definecolor{blue2}{rgb}{0.3,0.3,0.8}
+\definecolor{blue3}{rgb}{0.2,0.2,0.9}
+
+\newcommand{\yue}[1]{\textcolor{red}{[yue: #1]}}
+\newcommand{\weikai}[1]{\textcolor{blue}{[weikai: #1]}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+    
+\end{abstract}
+
+\section{Introduction}
+
+\section{Related Work}
+\subsection{Facebook}
+
+\section{}
+
+\section{Performance}
+\begin{center}
+    
+\begin{tikzpicture}
+% \begin{semilogxaxis}[
+\begin{axis}[
+    title = Signal with Report,
+    xlabel = {length of message (byte)},
+    ylabel = {time consumed (ms)},
+    width = \textwidth * 0.7,
+    % log basis x = {10},
+    % ytick distance = {0.1},
+    % ymin = {0},
+    % ymax = {0.6},
+    % xtick distance = {100000},
+    legend style = {draw = none},
+    legend pos = north west,
+]
+\addplot [blue] table {data/with_report_enc.dat};
+\addplot [green]table {data/with_report_sign.dat};
+\addplot [red] table {data/with_report_dec.dat};
+
+\addplot [dashed, blue] table {data/without_report_enc.dat};
+\addplot [dashed, red] table {data/without_report_dec.dat};
+
+\legend{Enc, Sign, Dec, Enc (orig), Dec (orig)}
+\end{axis}
+% \end{semilogxaxis}
+\end{tikzpicture}
+%
+% \hskip 10pt
+% %
+% \begin{tikzpicture}
+% \begin{axis}[
+%     title = Signal without Report,
+%     xlabel = {\# length of message},
+%     ylabel = {time consumed (ms)},
+%     yticklabel pos = upper,
+%     % log basis x = {10},
+%     % ytick distance = {0.1},
+%     % ymin = {0},
+%     % ymax = {0.6},
+% ]
+% \addplot [blue] table {data/without_report_enc.dat};
+% \addplot [red] table {data/without_report_dec.dat};
+% \end{axis}
+% \end{tikzpicture}
+
+\end{center}
+
+\bibliographystyle{plain}
+\bibliography{references}
+\end{document}
