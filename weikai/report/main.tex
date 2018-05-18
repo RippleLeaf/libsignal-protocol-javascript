@@ -181,13 +181,9 @@ function reportAbuse(evidence, tag){
         verifyMAC(evidence.commitment, secretKey, tag, 32),
         verifyMAC(macInput, evidence.commitKey, evidence.commitment, 32)
     ]);
-  };
+}
 \end{verbatim}
 }
-
-
-
-
 
 \subsection{Usage}
 
