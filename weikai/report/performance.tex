@@ -1,13 +1,45 @@
+% !TEX root = ./main.tex
 
 \section{Performance}
+In this section, we test the running time of modified implementation of encryption and decryption algorithm on client,
+and the signing time of server for different sizes of messages.
+By comparison with the running time of encryption and decryption in the original implementation,
+we claim that adding the abuse report functionality to libsignal library introduces only very small and totally acceptable time overhead. 
 
-\include{performance}
+
+
+
+
+% Testing environment:
+\paragraph{Test environment.}
+We test our simulation in Google Chrome browser of version 66.0.3359.170,
+with embeded JavaScript of version V8 6.6.346.32.
+The Chrome browser runs on Windows 10 operating system,
+on a personal computer with Intel Core i7-6700 @ 3.40 Hz CPU and 16.0 GB RAM memory.
+Alrough the physical RAM is large enough to handle longer message encryption,
+the memory space we can use is restricted by the sandbox environment of Chrome browser.
+In our experiment, the limitation of size of plaintext is between $5 \times 10^7 ~ 10^8$ bytes.
+For larger plaintext message, the page will throw error.
+If we implement the application (client and server) in local environment,
+We can implement the encryption for larger messages.
+
+Our running result is shown in Figure~\ref{graph:performance}.
+
+libsignal-protocol.js, v1.3.0
+
+% Google Chrome 66.0.3359.170,
+% JavaScript V8 6.6.346.32
+% Windows 10
+% CPU: Intel Core i7-6700 @ 3.40 Hz
+% RAM: 16.0 GB
+
 \begin{center}
     
 \begin{tikzpicture}
+\label{graph:performance}
 % \begin{semilogxaxis}[
 \begin{axis}[
-    title = Signal with Report,
+    title = Simulation time of Signal with Report,
     xlabel = {length of message (byte)},
     ylabel = {time consumed (ms)},
     width = \textwidth * 0.7,
@@ -30,23 +62,14 @@
 \end{axis}
 % \end{semilogxaxis}
 \end{tikzpicture}
-%
-% \hskip 10pt
-% %
-% \begin{tikzpicture}
-% \begin{axis}[
-%     title = Signal without Report,
-%     xlabel = {\# length of message},
-%     ylabel = {time consumed (ms)},
-%     yticklabel pos = upper,
-%     % log basis x = {10},
-%     % ytick distance = {0.1},
-%     % ymin = {0},
-%     % ymax = {0.6},
-% ]
-% \addplot [blue] table {data/without_report_enc.dat};
-% \addplot [red] table {data/without_report_dec.dat};
-% \end{axis}
-% \end{tikzpicture}
-
 \end{center}
+
+From the graph, we can see that the in both cases (with or without abuse report functionality),
+the encryption time is more than twice of decryption time.
+The time of calculating commitment on the sender side
+and the time of validate the commitment 
+
+In addtition to time overhead,
+adding abuse report functionality also introduces space overhead,
+as the receiver client now need to store a commitment $C_2$ with each plaintext message.
+

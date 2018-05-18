@@ -1,2 +1,44 @@
+% !TEX root = ./main.tex
 
 \section{Discussion}
+\subsection{API Changing}
+
+\subsection{Server-in-the-Middle is Necessary}
+Many of the existing message franking schemes,
+including Facebook implementation and our work,
+requires that each message from the sender to the receiver be relayed by the server in the middle.
+It seems a little bit unsatisfactory from the privacy perspective,
+as the server can immediately know when and to whom the sender wants to talk.
+Even though the server cannot decrypt the ciphertext,
+it still leaks private information and might lead to higher vulnerability to side channel attacks.
+So we want to ask here: \emph{can we get rid of the server between the sender and the receiver while having the good abuse report functionality?}
+
+It looks like just a choice of design.
+Message relaying at the server not really necessary to achieve the abuse report functionality.
+For example, each pair of user can generate public-secret key pairs, exchange own public keys,
+and sign the ciphertext with undeniable signature using the corresponding secret key when sending messages to each other.
+The server only stores the public keys of all users.
+If one user wants to accuse someone of abusing, it can just send the signed message to the server,
+and server can verify if the message is sent by the accused user.
+\yue{Check!}
+
+However, all designs of this kind has an obvious drawback:
+the server does not know any more information about the message than any other third-party,
+all of the evidence are in the receiver's control. 
+If the receiver can prove to the server that a message is indeed sent by the sender,
+it can also prove to any other untrusted ones.
+It causes privacy concern on the sender side, 
+as the sender might not want to disclose to any third party that it has signed on some message.
+Actually, passing the message through the server
+is just choosing server as a trusted third party,
+as the receiver can maliciously disclose any message to the server and prove that the message is indeed sent from the sender,
+even if the message is not an abuse message.
+
+
+Take all this into consideration, we finally choose our current implementation:
+the server signs and relays the commitment of ciphertext.
+The only extra thing the server needs to store is its own secret key.
+The idea is: if I want abuse reporting system, I need to trust some third party;
+if I have to trust some party, I choose to trust the server.
+
+\subsection{}
