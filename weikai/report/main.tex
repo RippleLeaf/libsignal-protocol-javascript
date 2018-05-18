@@ -43,7 +43,59 @@
 \section{Related Work}
 \subsection{Facebook}
 
-\section{}
+
+\section{Implementation of Message Franking}
+
+Adding message franking to an existing end-to-end encrypted
+messaging protocol incurs interface change on both client and server side.
+The interface of Sender ({\tt encrypt}) doesn't change,
+which takes as input a plaintext
+although outputs a cipher message in a new format.
+However, the interface of Receiver ({\tt decrypt}),
+after takes as input a cipher message,
+outputs not only a plaintext but also an opening or \emph{proof},
+where the proof is needed 
+whenever Receiver wants to report the plaintext to Server.
+Finally, to verify a pair of plaintext and proof,
+in our implementation,
+Server \emph{forwards and tags} the cipher message in the sending phase,
+and thus it is necessary to use the new format of the cipher message
+to efficiently compute the tag.
+In the following, we describe such interface and its usage,
+and then, some implementation details are shown 
+regarding the security and efficiency.
+\weikai{define sending phase and reporting phase}
+
+\subsection{New Interfaces of Library}
+
+We implement Committing Encrypt-then-PRF on {\tt libsignal-protocol-javascript},
+the Signal Protocol library for JavaScript.
+The following interface works directly in JavaScript,
+but it is straightforward to 
+implement them on the library for Java or for C
+given that it was already implemented using Protocol Buffers\footnote{
+See https://developers.google.com/protocol-buffers/.
+}.
+
+
+
+\paragraph{Client-side Interface}
+
+
+
+
+\paragraph{Server-side Interface}
+
+
+
+\subsection{Usage}
+
+
+
+\subsection{Security and Implementation Details}
+
+
+
 
 \section{Performance}
 \begin{center}
@@ -94,6 +146,15 @@
 % \end{tikzpicture}
 
 \end{center}
+
+
+
+\section{Discussion}
+
+
+
+
+
 
 \bibliographystyle{plain}
 \bibliography{references}
