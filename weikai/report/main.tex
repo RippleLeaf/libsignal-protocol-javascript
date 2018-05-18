@@ -20,6 +20,7 @@
 \usepackage{comment}
 \usepackage{enumitem}
 \usepackage{color}
+\usepackage{parskip} % Remove paragraph indentation
 
 \usepackage{pgfplots}
 \pgfplotsset{width = 5.9cm, compat=1.5}
@@ -27,6 +28,26 @@
 \definecolor{blue1}{rgb}{0.4,0.4,0.7}
 \definecolor{blue2}{rgb}{0.3,0.3,0.8}
 \definecolor{blue3}{rgb}{0.2,0.2,0.9}
+
+% \usepackage{listings}
+% \lstset{ 
+%   language=C,                     % the language of the code
+%   basicstyle=\tt\small,       % the size of the fonts that are used for the code
+%   numbers=none,                   % where to put the line-numbers
+%   backgroundcolor=\color{lightgray},  % choose the background color. You must add \usepackage{color}
+%   showspaces=false,               % show spaces adding particular underscores
+%   showstringspaces=false,         % underline spaces within strings
+%   showtabs=false,                 % show tabs within strings adding particular underscores
+%   tabsize=2,                      % sets default tabsize to 2 spaces
+%   breaklines=true,                % sets automatic line breaking
+%   keywordstyle=\color{blue},      % keyword style
+%   commentstyle=\color{darkgray},   % comment style
+%   stringstyle=\color{mauve},      % string literal style
+% } 
+
+% \usepackage{minted}
+
+
 
 \newcommand{\yue}[1]{\textcolor{red}{[yue: #1]}}
 \newcommand{\weikai}[1]{\textcolor{blue}{[weikai: #1]}}
@@ -77,12 +98,48 @@ given that it was already implemented using Protocol Buffers\footnote{
 See https://developers.google.com/protocol-buffers/.
 }.
 
+\paragraph{Client-side Interface: Output of {\tt decryptWhisperMessage}.}
+In this paragraph, 
+we describe the change of return type of {\tt decryptWhisperMessage},
+the function that handling decryption.
+The interface of session-building and encryption are unchanged
+and deferred to the Usage part (Section~\ref{sec:usage}).
 
-
-\paragraph{Client-side Interface}
-
-
-
+% \begin{lstlisting}
+% sessionCipher.decryptWhisperMessage(ciphertext).then(function(plaintext) {
+%     // handle plaintext ArrayBuffer
+% });
+% \end{lstlisting}
+% \begin{minted}
+% sessionCipher.decryptWhisperMessage(ciphertext.body, "binary").then(function (plaintext) {
+%     console.log(plaintext);
+% });
+% \end{minted}
+The function call to decrypt a chiper message works a follows,
+where {\tt ciphertext} is the object returned by the encryption,
+and {\tt plaintext} is an array of bytes.
+{\small
+\begin{verbatim}
+sessionCipher.decryptWhisperMessage(ciphertext.body, "binary").then(function (plaintext) {
+    console.log(plaintext);
+});
+\end{verbatim}
+}
+However, with Message Franking implemented,
+we augment the plaintext into a structure:
+{\small
+\begin{verbatim}
+{
+    header: ArrayBuffer,         // metadata, returned for HMAC verification
+    body: ArrayBuffer,           // the original plaintext
+    commitKey: ArrayBuffer(32),  // commitKey and commitment, to verify, check
+    commitment: ArrayBuffer(32)  // HMAC(commitKey, header.concat(body)) == commitment
+}
+\end{verbatim}
+}
+Note that such returned structure doesn't include a server generated tag,
+which depends on how does Server verify the {\tt commitment}.
+It is defined in the next paragraph.
 
 \paragraph{Server-side Interface}
 
