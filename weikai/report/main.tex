@@ -29,26 +29,6 @@
 \definecolor{blue2}{rgb}{0.3,0.3,0.8}
 \definecolor{blue3}{rgb}{0.2,0.2,0.9}
 
-% \usepackage{listings}
-% \lstset{ 
-%   language=C,                     % the language of the code
-%   basicstyle=\tt\small,       % the size of the fonts that are used for the code
-%   numbers=none,                   % where to put the line-numbers
-%   backgroundcolor=\color{lightgray},  % choose the background color. You must add \usepackage{color}
-%   showspaces=false,               % show spaces adding particular underscores
-%   showstringspaces=false,         % underline spaces within strings
-%   showtabs=false,                 % show tabs within strings adding particular underscores
-%   tabsize=2,                      % sets default tabsize to 2 spaces
-%   breaklines=true,                % sets automatic line breaking
-%   keywordstyle=\color{blue},      % keyword style
-%   commentstyle=\color{darkgray},   % comment style
-%   stringstyle=\color{mauve},      % string literal style
-% } 
-
-% \usepackage{minted}
-
-
-
 \newcommand{\yue}[1]{\textcolor{red}{[yue: #1]}}
 \newcommand{\weikai}[1]{\textcolor{blue}{[weikai: #1]}}
 
@@ -105,16 +85,6 @@ the function that handling decryption.
 The interface of session-building and encryption are unchanged
 and deferred to the Usage part (Section~\ref{sec:usage}).
 
-% \begin{lstlisting}
-% sessionCipher.decryptWhisperMessage(ciphertext).then(function(plaintext) {
-%     // handle plaintext ArrayBuffer
-% });
-% \end{lstlisting}
-% \begin{minted}
-% sessionCipher.decryptWhisperMessage(ciphertext.body, "binary").then(function (plaintext) {
-%     console.log(plaintext);
-% });
-% \end{minted}
 The function call to decrypt a chiper message works a follows,
 where {\tt ciphertext} is the object returned by the encryption,
 and {\tt plaintext} is an array of bytes.
