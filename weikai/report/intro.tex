@@ -1,3 +1,5 @@
+%!TEX root = main.tex
+
 \section{Introduction}
 
 In the scenario of end-to-end messaging,
@@ -18,3 +20,47 @@ where both Sender and Receiver are two clients;
 then, in a \emph{reporting phase},
 Receiver (w.r.t.~the message) may want to report to the trusted Server
 that the message is abused.
+
+In this project, we implement message franking
+in the open source library {\tt libsignal},
+which is an open-source end-to-end encryption protocol.
+The implemented message franking scheme is 
+Committing Encrypt-then-PRF (CEP),
+and we include the pseudocode in Figure~\ref{algo:cep} for completeness.
+
+\begin{figure}[t]
+\begin{algorithm}[H]
+\newcommand{\com}{{\rm com}}
+\newcommand{\hmac}{{\rm HMAC}}
+	\caption{Scheme of Committing Encrypt-then-PRF (CEP)} 
+	\label{algo:cep}
+	\begin{algorithmic}[1]
+	\Procedure{CEP-Enc$^N_K$}{$H, M$}
+		\State $P \gets E_K(N, 0^\ell || 0^\ell || M)$
+		\State $P_0 \gets P[0:\ell], P_1 \gets P[\ell:2\ell], C \gets P[2\ell:]$
+		\State $\com \gets \hmac_{P_0}(H || M)$
+		\State $T \gets \hmac_{P_1}(\com)$
+		\State \Return $(C || T, \com)$
+	\EndProcedure
+
+	\Procedure{CEP-Dec$^N_K$}{$H, C||T, \com$}
+		\State $P \gets D_K(N, 0^\ell || 0^\ell || C)$
+		\State $P_0 \gets P[0:\ell], P_1 \gets P[\ell:2\ell], M \gets P[2\ell:]$
+		\State $\com' \gets \hmac_{P_0}(H || M)$
+		\State $T' \gets \hmac_{P_1}(\com')$
+		\If{$T \neq T'$ or $\com \neq \com'$}
+			\State \Return $\bot$
+		\EndIf
+		\State \Return $(M, P_0)$
+	\EndProcedure
+
+	\Procedure{CEP-Verify}{$H, M, K_f, \com$}
+		\State $\com' \gets \hmac_{K_f}(H || M)$
+		\If{$\com \neq \com'$} \Return $0$ \EndIf 
+		\State \Return $1$
+	\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+\end{figure}
+
+
