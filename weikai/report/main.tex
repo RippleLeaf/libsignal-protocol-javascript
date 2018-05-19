@@ -4,7 +4,7 @@
 \usepackage[utf8]{inputenc}
 
 \title{CS6431 Project Report: Implementation of Message Franking on \texttt{libsignal} and Analysis}
-\author{Wei-kai Lin (wl572), Yue Guo (yg393)}
+\author{Wei-Kai Lin (wl572), Yue Guo (yg393)}
 % \date{February 2018}
 
 \usepackage{natbib}
@@ -42,9 +42,9 @@
 \begin{document}
 \maketitle
 
-\begin{abstract}
+% \begin{abstract}
     
-\end{abstract}
+% \end{abstract}
 
 
 \input{intro}
@@ -57,7 +57,7 @@
 
 Adding message franking to an existing end-to-end encrypted
 messaging protocol incurs interface change on both client and server side.
-The interface of Sender ({\tt encrypt}) doesn't change,
+The interface of the sender ({\tt encrypt}) doesn't change,
 which takes as input a plaintext
 although outputs a cipher message in a new format.
 However, the interface of the receiver ({\tt decrypt}),
@@ -106,9 +106,9 @@ sessionCipher.decryptWhisperMessage(ciphertext.body, "binary").then(function (pl
 However, with message franking implemented,
 we augment the plaintext into a structure.
 In the context of reporting an abuse, we call it ``evidence.''
+\begin{table}
 {\small
 \begin{verbatim}
-// Evidence
 {
     header: ArrayBuffer,         // metadata, returned for HMAC verification
     body: ArrayBuffer,           // the original plaintext
@@ -117,6 +117,8 @@ In the context of reporting an abuse, we call it ``evidence.''
 }
 \end{verbatim}
 }
+\caption{Evidence Structure}
+\end{table}
 Note that such returned structure doesn't include a server generated tag,
 which depends on how does server verify the {\tt commitment}.
 It is defined in the following paragraph.
@@ -174,7 +176,7 @@ as well as {\tt Evidence} returned from {\tt decrypt}.
 In the following sample code, 
 the server accepts directly the structure of {\tt Evidence} and the {\tt tag},
 and then verifies both {\tt tag} and the {\tt commitment} in {\tt Evidence}.
-Ideally, such server part should be part of the protocol
+Ideally, such server should be part of the protocol
 even though it is not included in client-side library {\tt libsingal-protocol}.
 Also note that a client application shall maintain every pair of 
 {\tt evidence, tag} rather than storing data inside {\tt libsingal-protocol}. 
