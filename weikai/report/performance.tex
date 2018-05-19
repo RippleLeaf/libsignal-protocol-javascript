@@ -10,7 +10,7 @@ we claim that adding the message franking (also called abuse report below) funct
 Our implementation is based on the open-source project \texttt{libsignal-protocol.js} of version v1.3.0.
 The original \texttt{libsignal} library only deals with the logic at client side.
 At the beginning, to test the performance in a more practical environment,
-we tried to set up the client and server using the implementation of \texttt{Signal}, an open-source messaging application based on \texttt{libsignal} protocol.
+we tried to set up the client and server using the implementation of \texttt{Signal}, the open-source messaging application based on \texttt{libsignal} protocol.
 However, setting up the user identity in \texttt{Signal} requires SMS message validation,
 which is a little bit tedious and irrelevant to our goal.
 So finally we choose to evaluate the performance of simulation in a widely-used browser.
@@ -27,7 +27,7 @@ Therefore we focus on the comparison between the time consumption of original im
 We test our simulation in Google Chrome browser of version 66.0.3359.170,
 with embedded JavaScript of version V8 6.6.346.32.
 The Chrome browser runs on Windows 10 operating system,
-on a personal computer with Intel Core i7-6700 @ 3.40 Hz CPU and 16.0 GB RAM memory.
+on a commodity desktop computer with Intel Core i7-6700 @ 3.40 Hz CPU and 16.0 GB RAM memory.
 
 
 Although the physical RAM is large enough to handle longer message encryption,
@@ -101,5 +101,5 @@ Adding the abuse report functionality won't significantly impact the performance
 
 In addition to time overhead,
 adding abuse report functionality also introduces constant space overhead for each message,
-as the receiver client now need to store a commitment $C_2$ with each plaintext message.
+as the receiver client now need to store a commitment $\com$ with each plaintext message.
 
