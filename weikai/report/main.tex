@@ -49,11 +49,8 @@
 
 \input{intro}
 
-
-
-
-\section{Related Work}
-\subsection{Facebook}
+% \section{Related Work}
+% \subsection{Facebook}
 
 
 \section{Implementation of Message Franking}
@@ -63,14 +60,14 @@ messaging protocol incurs interface change on both client and server side.
 The interface of Sender ({\tt encrypt}) doesn't change,
 which takes as input a plaintext
 although outputs a cipher message in a new format.
-However, the interface of Receiver ({\tt decrypt}),
+However, the interface of the receiver ({\tt decrypt}),
 after takes as input a cipher message,
 outputs not only a plaintext but also an opening or \emph{proof},
 where the proof is needed 
-whenever Receiver wants to report the plaintext to Server.
+whenever the receiver wants to report the plaintext to the server.
 Finally, to verify a pair of plaintext and proof,
 in our implementation,
-Server \emph{tags and forwards} the cipher message in the sending phase,
+the server \emph{tags and forwards} the cipher message in the sending phase,
 and thus it is necessary to use the new format of the cipher message
 to efficiently compute the tag.
 In the following, we describe such interface and its usage,
@@ -125,12 +122,12 @@ which depends on how does server verify the {\tt commitment}.
 It is defined in the following paragraph.
 
 \paragraph{Server-side Interface: Cipher Message.}
-In scheme of CEP, Server needs to ``know'' 
+In scheme of CEP, the server needs to ``know'' 
 the {\tt commitment} of each cipher message
 in order to verify the plaintext.
 In the implementation, 
-Server computes a tag of {\tt commitment} using its secret key,
-and then forwards both cipher message and tag to Receiver.
+the server computes a tag of {\tt commitment} using its secret key,
+and then forwards both cipher message and tag to the receiver.
 We modify the format of cipher messages as follows,
 where fields {\tt mac}, {\tt commitment} and {\tt tag}
 are modified or added for the purpose of message franking.
