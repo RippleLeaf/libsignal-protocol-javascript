@@ -39,8 +39,7 @@ and we include the pseudocode in Figure~\ref{algo:cep}.
 	are derived using HKDF from the shared secret
 	of each message in {\tt libsignal};
 	$H$ is the header of each message,
-	including public keys and identifiers, version number,
-	and other meta-data;
+	which will be elaborated in Section~\ref{sec:version_verify};
 	$M$ and $C$ are plaintext/ciphertext respectively.
 	}
 	\label{algo:cep}
