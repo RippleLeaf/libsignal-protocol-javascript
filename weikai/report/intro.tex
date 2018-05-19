@@ -1,0 +1,20 @@
+\section{Introduction}
+
+In the scenario of end-to-end messaging,
+a receiver may want to report to a trusted third party 
+that the sender has sent abused message.
+Note that the server typically needs to verify the report is authentic,
+i.e., the sender indeed sent such message.
+However, as the encryption is end-to-end,
+the server could not know the message had the receiver not reported.
+Message franking~\cite{grubbs_message_2017,fb_whitepaper} considers such scenario and proposes schemes
+that realizes 1) the security of end-to-end authenticate encryption, and 
+2) the feature of verifying an authentic report.
+For the sake of exploration,
+for each message, 
+we say that the message is sent from Sender to Receiver 
+in a \emph{sending phase},
+where both Sender and Receiver are two clients;
+then, in a \emph{reporting phase},
+Receiver (w.r.t.~the message) may want to report to the trusted Server
+that the message is abused.
