@@ -70,7 +70,7 @@ where the proof is needed
 whenever Receiver wants to report the plaintext to Server.
 Finally, to verify a pair of plaintext and proof,
 in our implementation,
-Server \emph{forwards and tags} the cipher message in the sending phase,
+Server \emph{tags and forwards} the cipher message in the sending phase,
 and thus it is necessary to use the new format of the cipher message
 to efficiently compute the tag.
 In the following, we describe such interface and its usage,
@@ -98,7 +98,7 @@ the function that handling decryption.
 The interface of session-building and encryption are unchanged.
 We defer the usage of the new interface to Section~\ref{sec:usage}.
 
-The function call to decrypt a chiper message works a follows,
+The function call to decrypt a cipher message works as follows,
 where {\tt ciphertext} is the object returned by the encryption,
 and {\tt plaintext} is an array of bytes.
 {\small
@@ -108,7 +108,7 @@ sessionCipher.decryptWhisperMessage(ciphertext.body, "binary").then(function (pl
 });
 \end{verbatim}
 }
-However, with Message Franking implemented,
+However, with message franking implemented,
 we augment the plaintext into a structure.
 In the context of reporting an abuse, we call it ``evidence.''
 {\small
@@ -123,7 +123,7 @@ In the context of reporting an abuse, we call it ``evidence.''
 \end{verbatim}
 }
 Note that such returned structure doesn't include a server generated tag,
-which depends on how does Server verify the {\tt commitment}.
+which depends on how does server verify the {\tt commitment}.
 It is defined in the following paragraph.
 
 \paragraph{Server-side Interface: Cipher Message.}
@@ -135,7 +135,7 @@ Server computes a tag of {\tt commitment} using its secret key,
 and then forwards both cipher message and tag to Receiver.
 We modify the format of cipher messages as follows,
 where fields {\tt mac}, {\tt commitment} and {\tt tag}
-are modified or added for the purpose of Message Franking.
+are modified or added for the purpose of message franking.
 \begin{table}[h]
 {\small
 \begin{verbatim}
@@ -159,7 +159,7 @@ are modified or added for the purpose of Message Franking.
 \label{tbl:cipher-message}
 \end{table}
 Upon forwarding a cipher message,
-Server shall use its secret key to compute a tag from {\tt commitment},
+the server shall use its secret key to compute a tag from {\tt commitment},
 and then write the tag to the {\tt tag} field.
 The following is our sample code.
 {\small
@@ -177,7 +177,7 @@ To report a message,
 the client of Receiver has to store {\tt tag} in the cipher message,
 as well as {\tt Evidence} returned from {\tt decrypt}.
 In the following sample code, 
-Server accepts directly the structure of {\tt Evidence} and the {\tt tag},
+the server accepts directly the structure of {\tt Evidence} and the {\tt tag},
 and then verifies both {\tt tag} and the {\tt commitment} in {\tt Evidence}.
 Ideally, such server part should be part of the protocol
 even though it is not included in client-side library {\tt libsingal-protocol}.
@@ -205,7 +205,7 @@ identical to the original procedures,
 and hence we show only decryption.
 Compared to the original procedures,
 the only difference is that decryption returns a structure of Evidence,
-and that the tag of Server is also returned to 
+and that the tag of the server is also returned to 
 the application.
 {\small
 \begin{verbatim}

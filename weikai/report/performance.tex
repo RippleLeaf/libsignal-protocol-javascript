@@ -4,7 +4,7 @@
 In this section, we test the running time of modified implementation of encryption and decryption algorithm on client,
 and the signing time of server for different sizes of messages.
 By comparison with the running time of encryption and decryption in the original implementation,
-we claim that adding the abuse report functionality to \texttt{libsignal} library introduces only very small and totally acceptable time overhead. 
+we claim that adding the message franking (also called abuse report below) functionality to \texttt{libsignal} library introduces only very small and totally acceptable time overhead. 
 
 
 Our implementation is based on the open-source project \texttt{libsignal-protocol.js} of version v1.3.0.
@@ -56,8 +56,8 @@ The running results are shown in Figure~\ref{graph:performance}.
 % CPU: Intel Core i7-6700 @ 3.40 Hz
 % RAM: 16.0 GB
 
+\vspace{0.1in}
 \begin{center}
-    
 \begin{tikzpicture}
 \label{graph:performance}
 % \begin{semilogxaxis}[
@@ -86,6 +86,7 @@ The running results are shown in Figure~\ref{graph:performance}.
 % \end{semilogxaxis}
 \end{tikzpicture}
 \end{center}
+\vspace{0.1in}
 
 From the graph, we can see that the in both cases (with or without abuse report functionality),
 the encryption time is more than twice of decryption time.
