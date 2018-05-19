@@ -41,11 +41,11 @@ as the receiver can maliciously disclose any message to the server and prove tha
 even if the message is not an abuse message.
 
 
-Take all this into consideration, we finally choose our current implementation:
+Take all these into consideration, we finally choose the strategy of our current implementation:
 the server signs and relays the commitment of ciphertext.
 The only extra thing the server needs to store is its own secret key.
-The idea is: if I want abuse reporting system, I need to trust some third party;
-if I have to trust some party, I choose to trust the server.
+The idea is: if I want a messaging application supports abuse reporting, I need to trust some third party;
+if I have to trust some third party, I choose to trust the server.
 
 \subsection{Version Number Verification}
 \label{sec:version_verify}
