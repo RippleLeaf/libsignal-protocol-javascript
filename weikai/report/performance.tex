@@ -25,12 +25,12 @@ Therefore we focus on the comparison between the time consumption of original im
 % Testing environment:
 \paragraph{Test environment.}
 We test our simulation in Google Chrome browser of version 66.0.3359.170,
-with embeded JavaScript of version V8 6.6.346.32.
+with embedded JavaScript of version V8 6.6.346.32.
 The Chrome browser runs on Windows 10 operating system,
 on a personal computer with Intel Core i7-6700 @ 3.40 Hz CPU and 16.0 GB RAM memory.
 
 
-Alrough the physical RAM is large enough to handle longer message encryption,
+Although the physical RAM is large enough to handle longer message encryption,
 the memory space we can use is restricted by the sandbox environment of Chrome browser.
 In our experiment, the limitation of size of plaintext is between $5 \times 10^7 ~ 10^8$ bytes.
 For larger plaintext message, the page will throw error.
@@ -58,11 +58,11 @@ The running results are shown in Figure~\ref{graph:performance}.
 
 \vspace{0.1in}
 \begin{center}
+\begin{figure}
 \begin{tikzpicture}
-\label{graph:performance}
 % \begin{semilogxaxis}[
 \begin{axis}[
-    title = Simulation time of Signal with Report,
+    % title = ,
     xlabel = {length of message (byte)},
     ylabel = {time consumed (ms)},
     width = \textwidth * 0.7,
@@ -81,21 +81,25 @@ The running results are shown in Figure~\ref{graph:performance}.
 \addplot [dashed, blue] table {data/without_report_enc.dat};
 \addplot [dashed, red] table {data/without_report_dec.dat};
 
-\legend{Enc, Sign, Dec, Enc (orig), Dec (orig)}
+\legend{Enc, Sign, Dec, Enc (original), Dec (original)}
 \end{axis}
 % \end{semilogxaxis}
 \end{tikzpicture}
+
+\caption{Simulation time of Signal with report.}
+\label{graph:performance}
+\end{figure}
 \end{center}
 \vspace{0.1in}
 
-From the graph, we can see that the in both cases (with or without abuse report functionality),
+From the graph, we can see that in both cases (with or without abuse report functionality),
 the encryption time is more than twice of decryption time.
 The time of calculating commitment on the sender side
 and the time of validating the commitment
 is around $5\%$ of the original time consumption.
 Adding the abuse report functionality won't significantly impact the performance. 
 
-In addtition to time overhead,
+In addition to time overhead,
 adding abuse report functionality also introduces constant space overhead for each message,
 as the receiver client now need to store a commitment $C_2$ with each plaintext message.
 
