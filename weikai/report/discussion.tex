@@ -56,12 +56,12 @@ find that it MACs the whole body but without the \texttt{type} field in the head
 
 The \texttt{type} field indicates the type of the current message:
 \begin{itemize}
-\item $\texttt{type} = 3$: PreKeyMessage, the initial message of a new session
-\item $\texttt{type} = 1$: the following message in a session that has already been built 
+\item $\texttt{type} = 3$: PreKeyMessage, the initial message of a new session.
+\item $\texttt{type} = 1$: any following message in a session that has already been built.
 \end{itemize}
 These two categories of messages are wrapped in different formats.
 The PreKeyMessage has an additional header including more public identities of the sender,
-e.g. signed public key.
+e.g.~signed public key.
 We argue that the \texttt{type} field should also be MAC-ed,
 otherwise there will be a security hole here.
 If the \texttt{type} is not included in the integrity check,
