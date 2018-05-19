@@ -170,8 +170,8 @@ as well as {\tt Evidence} returned from {\tt decrypt}.
 In the following sample code, 
 Server accepts directly the structure of {\tt Evidence} and the {\tt tag},
 and then verifies both {\tt tag} and the {\tt commitment} in {\tt Evidence}.
-Such server part should be part of the protocol
-even though it is not included in client-side {\tt libsingal-protocol}.
+Ideally, such server part should be part of the protocol
+even though it is not included in client-side library {\tt libsingal-protocol}.
 Also note that a client application shall maintain every pair of 
 {\tt evidence, tag} rather than storing data inside {\tt libsingal-protocol}. 
 {\small
@@ -190,6 +190,25 @@ function reportAbuse(evidence, tag){
 
 \subsection{Usage}
 
+The procedures to generate keys and to encrypt are 
+identical to the original procedures,
+and hence we show only decryption.
+Compared to the original procedures,
+the only difference is that decryption returns a structure of Evidence,
+and that the tag of Server is also returned to 
+the application.
+{\small
+\begin{verbatim}
+var address = new libsignal.SignalProtocolAddress(sender.identifier, sender.keyId);
+var sessionCipher = new libsignal.SessionCipher(rcver.store, address);
+return sessionCipher.decryptPreKeyWhisperMessage(cipher.body, "binary").then(function (evidence) {
+    return [evidence, cipher.tag];
+});
+\end{verbatim}
+}
+To report an abused message, 
+it suffices to send {\tt evidence, cipher.tag} to Server.
+It is straightforward and omitted here.
 
 
 \subsection{Security and Implementation Details}
