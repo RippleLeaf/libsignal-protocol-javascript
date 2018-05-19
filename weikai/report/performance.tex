@@ -40,6 +40,12 @@ Besides, even in the browser terminal,
 if the user wants to send message or file of large size,
 we can always extend the library with large message slicing and different symmetric encryption scheme suitable for files.
 
+To evaluate the time overhead,
+we choose message size from $1000$ to $10,000,000$ bytes.
+For each data point, we run the whole process of two cases (original implementation and our modification with message franking),
+each for 50 times.
+We measure the time consumption of each encryption, signing and decryption process
+and calculate the average.
 The running results are shown in Figure~\ref{graph:performance}.
 
 % libsignal-protocol.js, v1.3.0
