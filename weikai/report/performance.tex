@@ -4,9 +4,21 @@
 In this section, we test the running time of modified implementation of encryption and decryption algorithm on client,
 and the signing time of server for different sizes of messages.
 By comparison with the running time of encryption and decryption in the original implementation,
-we claim that adding the abuse report functionality to libsignal library introduces only very small and totally acceptable time overhead. 
+we claim that adding the abuse report functionality to \texttt{libsignal} library introduces only very small and totally acceptable time overhead. 
 
 
+Our implementation is based on the open-source project \texttt{libsignal-protocol.js} of version v1.3.0.
+The original \texttt{libsignal} library only deals with the logic at client side.
+At the beginning, to test the performance in a more practical environment,
+we tried to set up the client and server using the implementation of \texttt{Signal}, an open-source messaging application based on \texttt{libsignal} protocol.
+However, setting up the user identity in \texttt{Signal} requires SMS message validation,
+which is a little bit tedious and irrelevant to our goal.
+So finally we choose to evaluate the performance of simulation in a widely-used browser.
+As the whole process 
+% sender encrypts - server signs - receiver decrypts, 
+is simulated in one process in browser rather than different processes in native environment,
+the absolute value of running time might not be of that valuable reference.
+Therefore we focus on the comparison between the time consumption of original implementation and our modification.
 
 
 
@@ -16,16 +28,21 @@ We test our simulation in Google Chrome browser of version 66.0.3359.170,
 with embeded JavaScript of version V8 6.6.346.32.
 The Chrome browser runs on Windows 10 operating system,
 on a personal computer with Intel Core i7-6700 @ 3.40 Hz CPU and 16.0 GB RAM memory.
+
+
 Alrough the physical RAM is large enough to handle longer message encryption,
 the memory space we can use is restricted by the sandbox environment of Chrome browser.
 In our experiment, the limitation of size of plaintext is between $5 \times 10^7 ~ 10^8$ bytes.
 For larger plaintext message, the page will throw error.
 If we implement the application (client and server) in local environment,
 We can implement the encryption for larger messages.
+Besides, even in the browser terminal,
+if the user wants to send message or file of large size,
+we can always extend the library with large message slicing and different symmetric encryption scheme suitable for files.
 
-Our running result is shown in Figure~\ref{graph:performance}.
+The running results are shown in Figure~\ref{graph:performance}.
 
-libsignal-protocol.js, v1.3.0
+% libsignal-protocol.js, v1.3.0
 
 % Google Chrome 66.0.3359.170,
 % JavaScript V8 6.6.346.32
@@ -67,9 +84,11 @@ libsignal-protocol.js, v1.3.0
 From the graph, we can see that the in both cases (with or without abuse report functionality),
 the encryption time is more than twice of decryption time.
 The time of calculating commitment on the sender side
-and the time of validate the commitment 
+and the time of validating the commitment
+is around $5\%$ of the original time consumption.
+Adding the abuse report functionality won't significantly impact the performance. 
 
 In addtition to time overhead,
-adding abuse report functionality also introduces space overhead,
+adding abuse report functionality also introduces constant space overhead for each message,
 as the receiver client now need to store a commitment $C_2$ with each plaintext message.
 

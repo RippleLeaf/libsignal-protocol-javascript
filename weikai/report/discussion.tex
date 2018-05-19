@@ -1,6 +1,9 @@
 % !TEX root = ./main.tex
 
 \section{Discussion}
+In this section, we discuss two of the major issues we encountered in the process of implementation.
+
+
 % \subsection{API Changing}
 
 \subsection{Server-in-the-Middle is Necessary}
@@ -42,8 +45,8 @@ The idea is: if I want abuse reporting system, I need to trust some third party;
 if I have to trust some party, I choose to trust the server.
 
 \subsection{Version Number Verification}
-Message authentication code (MAC) is an important tool to verify the integrety of the message and meta information.
-In libsignal, the MAC is a component of cipher message as shown in Table~\ref{tbl:cipher-message}.
+Message authentication code (MAC) is an important tool to verify the integrety of the message and the meta information.
+In \texttt{libsignal}, the MAC is a component of cipher message as shown in Table~\ref{tbl:cipher-message}.
 We carefully investigate the original implementation of libsignal,
 find that it MACs the whole body but without the \texttt{type} field in the header of the message.
 
@@ -52,9 +55,14 @@ The \texttt{type} field indicates the type of the current message:
 \item $\texttt{type} = 3$: PreKeyMessage, the initial message of a new session
 \item $\texttt{type} = 1$: the following message in a session that has already been built 
 \end{itemize}
-We argue that the \texttt{type} field should also be MAC-ed.
+These two categories of messages are wrapped in different formats.
+The PreKeyMessage has an additional header including more public identities of the sender,
+e.g. signed public key.
+We argue that the \texttt{type} field should also be MAC-ed,
+otherwise there will be a security hole here.
 If the \texttt{type} is not included in the integrety check,
-an adversary can perform an man-in-the-middle attack by changing the \texttt{type}
-from 1 to 3 to force the receiver to decrypt the message as a PreKeyMessage
-and build a new session with the adversary.
+an adversary can perform an man-in-the-middle attack by changing the \texttt{type} value.
+For example, changing \texttt{type} from 1 to 3 will force the receiver to decrypt a ordinary message as a PreKeyMessage.
+Due to the time limit, we are following the original implementation of \texttt{libsignal} now.
+We plan to include the type information into the MAC in the next step.
 
