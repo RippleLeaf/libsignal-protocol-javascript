@@ -32,7 +32,7 @@ on a commodity desktop computer with Intel Core i7-6700 @ 3.40 Hz CPU and 16.0 G
 
 Although the physical RAM is large enough to handle longer message encryption,
 the memory space we can use is restricted by the sandbox environment of Chrome browser.
-In our experiment, the limitation of size of plaintext is between $5 \times 10^7 \sim 10^8$ bytes.
+In our experiment, the limitation of size of plaintext is between $50 \sim 100$ million bytes.
 For larger plaintext message, the page will throw error.
 If we implement the application (the client and the server) in local environment,
 we can implement the encryption for larger messages by occupying more memory.
@@ -101,5 +101,5 @@ Adding the abuse report functionality won't significantly impact the performance
 
 In addition to time overhead,
 adding abuse report functionality also introduces constant space overhead for each message,
-as the receiver client now need to store a commitment $\com$ with each plaintext message.
+as the receiver client now need to store a commitment with each plaintext message.
 
