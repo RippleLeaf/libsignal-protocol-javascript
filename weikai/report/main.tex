@@ -127,9 +127,9 @@ and then forwards both cipher message and tag to Receiver.
 We modify the format of cipher messages as follows,
 where fields {\tt mac}, {\tt commitment} and {\tt tag}
 are modified or added for the purpose of Message Franking.
+\begin{table}[h]
 {\small
 \begin{verbatim}
-// CipherMessage
 {
     type: Unit8, 
     body: ArrayBuffer, concatenation of
@@ -146,6 +146,9 @@ are modified or added for the purpose of Message Franking.
 }
 \end{verbatim}
 }
+\caption{Cipher Message Structure}
+\label{tbl:cipher-message}
+\end{table}
 Upon forwarding a cipher message,
 Server shall use its secret key to compute a tag from {\tt commitment},
 and then write the tag to the {\tt tag} field.
