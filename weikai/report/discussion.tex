@@ -49,7 +49,7 @@ if I have to trust some party, I choose to trust the server.
 
 \subsection{Version Number Verification}
 \label{sec:version_verify}
-Message authentication code (MAC) is an important tool to verify the integrety of the message and the meta information.
+Message authentication code (MAC) is an important tool to verify the integrity of the message and the meta information.
 In \texttt{libsignal}, the MAC is a component of cipher message as shown in Table~\ref{tbl:cipher-message}.
 We carefully investigate the original implementation of libsignal,
 find that it MACs the whole body but without the \texttt{type} field in the header of the message.
@@ -64,7 +64,7 @@ The PreKeyMessage has an additional header including more public identities of t
 e.g. signed public key.
 We argue that the \texttt{type} field should also be MAC-ed,
 otherwise there will be a security hole here.
-If the \texttt{type} is not included in the integrety check,
+If the \texttt{type} is not included in the integrity check,
 an adversary can perform an man-in-the-middle attack by changing the \texttt{type} value.
 For example, changing \texttt{type} from 1 to 3 will force the receiver to decrypt a ordinary message as a PreKeyMessage.
 Due to the time limit, we are following the original implementation of \texttt{libsignal} now.
