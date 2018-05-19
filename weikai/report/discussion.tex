@@ -20,13 +20,13 @@ it still leaks private information and might lead to higher vulnerability to sid
 So we want to ask here: \emph{can we get rid of the server between the sender and the receiver while having the good abuse report functionality?}
 
 It looks like just a choice of design.
-Message relaying at the server not really necessary to achieve the abuse report functionality.
+Message relaying through the server is not really necessary to achieve the abuse report functionality.
 For example, each pair of user can generate public-secret key pairs, exchange own public keys,
 and sign the ciphertext with undeniable signature using the corresponding secret key when sending messages to each other.
 The server only stores the public keys of all users.
 If one user wants to accuse someone of abusing, it can just send the signed message to the server,
 and server can verify if the message is sent by the accused user.
-\yue{Check!}
+% \yue{Check!}
 
 However, all designs of this kind has an obvious drawback:
 the server does not know any more information about the message than any other third-party,
