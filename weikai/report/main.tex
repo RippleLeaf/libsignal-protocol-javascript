@@ -43,6 +43,10 @@
 
 \section{Introduction}
 
+
+
+
+
 \section{Related Work}
 \subsection{Facebook}
 
@@ -86,8 +90,8 @@ See https://developers.google.com/protocol-buffers/.
 In this paragraph, 
 we describe the change of return type of {\tt decryptWhisperMessage},
 the function that handling decryption.
-The interface of session-building and encryption are unchanged
-and deferred to the Usage part (Section~\ref{sec:usage}).
+The interface of session-building and encryption are unchanged.
+We defer the usage of the new interface to Section~\ref{sec:usage}.
 
 The function call to decrypt a chiper message works a follows,
 where {\tt ciphertext} is the object returned by the encryption,
@@ -189,6 +193,7 @@ function reportAbuse(evidence, tag){
 }
 
 \subsection{Usage}
+\label{sec:usage}
 
 The procedures to generate keys and to encrypt are 
 identical to the original procedures,
@@ -211,10 +216,7 @@ it suffices to send {\tt evidence, cipher.tag} to Server.
 It is straightforward and omitted here.
 
 
-\subsection{Security and Implementation Details}
-
-
-
+% \subsection{Security and Implementation Details}
 
 
 
