@@ -36101,12 +36101,13 @@ SessionCipher.prototype = {
               var macKey = ciphertext.slice(Internal.crypto.signKeyLength, Internal.crypto.signKeyLength*2);
               msg.ciphertext = ciphertext.slice(Internal.crypto.signKeyLength*2);
               var encodedMsg = msg.toArrayBuffer();
-
-              var macInput = new Uint8Array(encodedMsg.byteLength + 33*2 + 1);
-              macInput.set(new Uint8Array(util.toArrayBuffer(ourIdentityKey.pubKey)));
-              macInput.set(new Uint8Array(util.toArrayBuffer(session.indexInfo.remoteIdentityKey)), 33);
-              macInput[33*2] = (3 << 4) | 3;
-              macInput.set(new Uint8Array(encodedMsg), 33*2 + 1);
+              // commit to [header, plaintext], where header is
+              // [ourPk, theirPk, version(Uint8), ephemeralKey, counter(Uint32), previousCounter(Uint32)]
+              var header = this.getMacHeader(ourIdentityKey.pubKey, session.indexInfo.remoteIdentityKey,
+                  msg.ephemeralKey, msg.counter, msg.previousCounter);
+              var macInput = new Uint8Array(header.byteLength + buffer.byteLength);
+              macInput.set(header, 0);
+              macInput.set(new Uint8Array(buffer), header.byteLength);
               return Internal.crypto.sign(commitKey, macInput.buffer).then(function(commitment) {
                   return Promise.all([Internal.crypto.sign(macKey, commitment), commitment]);
               }).then(function (tags){
@@ -36310,22 +36311,21 @@ SessionCipher.prototype = {
         var commitKey = plaintext.slice(0, Internal.crypto.signKeyLength);
         var macKey = plaintext.slice(Internal.crypto.signKeyLength, Internal.crypto.signKeyLength*2);
         plaintext = plaintext.slice(Internal.crypto.signKeyLength*2);
-
-        var macInput = new Uint8Array(messageProto.byteLength + 33*2 + 1);
-        macInput.set(new Uint8Array(util.toArrayBuffer(session.indexInfo.remoteIdentityKey)));
-        macInput.set(new Uint8Array(util.toArrayBuffer(ourIdentityKey.pubKey)), 33);
-        macInput[33*2] = (3 << 4) | 3;
-        
-        macInput.set(new Uint8Array(messageProto), 33*2 + 1);
+        // verify [header, plaintext]
+        var header = this.getMacHeader(session.indexInfo.remoteIdentityKey, ourIdentityKey.pubKey, 
+            remoteEphemeralKey, message.counter, message.previousCounter);
+        var macInput = new Uint8Array(header.byteLength + plaintext.byteLength);
+        macInput.set(header, 0);
+        macInput.set(new Uint8Array(plaintext), header.byteLength);
         return Promise.all([
             plaintext, 
             commitKey, 
             commitment,
-            macInput.slice(0, 33*2 + 1),
+            header,
             Internal.verifyMAC(macInput.buffer, commitKey, commitment, 32),
             Internal.verifyMAC(commitment, macKey, mac, 32)
         ]);
-    }).then(function (ret){
+    }.bind(this)).then(function (ret){
         return {
             header: ret[3],
             body: ret[0],
@@ -36417,6 +36417,23 @@ SessionCipher.prototype = {
               ratchet.rootKey = masterKey[0];
           });
       });
+  },
+  getMacHeader: function(ourPk, theirPk, ephemeralKey, counter, previousCounter) {
+    // commit to [header, plaintext], where header is
+    // [ourPk, theirPk, version(Uint8), ephemeralKey, counter(Uint32), previousCounter(Uint32)]
+    var counter = new ArrayBuffer(4);
+    var dv = new DataView(counter, 0);
+    var length = 33 + 33 + 1 + ephemeralKey.byteLength + 4 + 4;
+    var header = new Uint8Array(length);
+    header.set(new Uint8Array(util.toArrayBuffer(ourPk)), 0);
+    header.set(new Uint8Array(util.toArrayBuffer(theirPk)), 33);
+    header[33*2] = (3 << 4) | 3;
+    header.set(new Uint8Array(ephemeralKey), 33*2 + 1);
+    dv.setUint32(0, counter);
+    header.set(new Uint8Array(counter), length - 8);
+    dv.setUint32(0, previousCounter);
+    header.set(new Uint8Array(counter), length - 4);
+    return header;
   },
   getRemoteRegistrationId: function() {
     return Internal.SessionLock.queueJobForNumber(this.remoteAddress.toString(), function() {
