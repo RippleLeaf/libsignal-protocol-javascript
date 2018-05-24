@@ -74,11 +74,11 @@ SessionCipher.prototype = {
               msg.ciphertext = ciphertext.slice(Internal.crypto.signKeyLength*2);
               var encodedMsg = msg.toArrayBuffer();
 
-              var macInput = new Uint8Array(buffer.byteLength + 33*2 + 1);
+              var macInput = new Uint8Array(encodedMsg.byteLength + 33*2 + 1);
               macInput.set(new Uint8Array(util.toArrayBuffer(ourIdentityKey.pubKey)));
               macInput.set(new Uint8Array(util.toArrayBuffer(session.indexInfo.remoteIdentityKey)), 33);
               macInput[33*2] = (3 << 4) | 3;
-              macInput.set(new Uint8Array(buffer), 33*2 + 1);
+              macInput.set(new Uint8Array(encodedMsg), 33*2 + 1);
               return Internal.crypto.sign(commitKey, macInput.buffer).then(function(commitment) {
                   return Promise.all([Internal.crypto.sign(macKey, commitment), commitment]);
               }).then(function (tags){
@@ -281,13 +281,13 @@ SessionCipher.prototype = {
         var plaintext = ret[0], ourIdentityKey = ret[1];
         var commitKey = plaintext.slice(0, Internal.crypto.signKeyLength);
         var macKey = plaintext.slice(Internal.crypto.signKeyLength, Internal.crypto.signKeyLength*2);
-
         plaintext = plaintext.slice(Internal.crypto.signKeyLength*2);
-        var macInput = new Uint8Array(plaintext.byteLength + 33*2 + 1);
+        
+        var macInput = new Uint8Array(messageProto.byteLength + 33*2 + 1);
         macInput.set(new Uint8Array(util.toArrayBuffer(session.indexInfo.remoteIdentityKey)));
         macInput.set(new Uint8Array(util.toArrayBuffer(ourIdentityKey.pubKey)), 33);
         macInput[33*2] = (3 << 4) | 3;
-        macInput.set(new Uint8Array(plaintext), 33*2 + 1);
+        macInput.set(new Uint8Array(messageProto), 33*2 + 1);
         return Promise.all([
             plaintext, 
             commitKey, 
