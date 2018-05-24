@@ -36046,7 +36046,6 @@ SessionCipher.prototype = {
       });
   },
   encrypt: function(buffer, encoding) {
-    // WK: CTR mode, add 2 more blocks as keys.
     plainByteBuffer = dcodeIO.ByteBuffer.wrap(buffer, encoding);
     buffer = plainByteBuffer.toArrayBuffer();
     var ctrBuffer = plainByteBuffer.prepend(
@@ -36094,14 +36093,10 @@ SessionCipher.prototype = {
           delete chain.messageKeys[chain.chainKey.counter];
           msg.counter = chain.chainKey.counter;
           msg.previousCounter = session.currentRatchet.previousCounter;
-
-// WK: encrypt is AES-CBC, keys[0] is symmetric key, keys[2] is IV.
-// WK: can use keys[0] and keys[2] in new implementation
-// WK: added AES-CTR wrapper, https://www.w3.org/TR/WebCryptoAPI/#aes-ctr-description
-// WK: just HMAC/crypto.sign
           return Internal.crypto.encryptAesCtr(
               keys[0], ctrBuffer, keys[2].slice(0, 16)
           ).then(function(ciphertext) {
+              // CTR mode, add 2 more blocks as keys.
               var commitKey = ciphertext.slice(0, Internal.crypto.signKeyLength);
               var macKey = ciphertext.slice(Internal.crypto.signKeyLength, Internal.crypto.signKeyLength*2);
               msg.ciphertext = ciphertext.slice(Internal.crypto.signKeyLength*2);
@@ -36116,7 +36111,7 @@ SessionCipher.prototype = {
                   return Promise.all([Internal.crypto.sign(macKey, commitment), commitment]);
               }).then(function (tags){
                   var mac = tags[0], commitment = tags[1];
-                  // WK: cipher format is [version: 1, ct, tag: 32, commitment: 32]
+                  // cipher format is [version (1), ciphertext (bytes), tag (32), commitment: 32]
                   var result = new Uint8Array(encodedMsg.byteLength + 1 + Internal.crypto.signKeyLength*2);
                   result[0] = (3 << 4) | 3;
                   result.set(new Uint8Array(encodedMsg), 1);
@@ -36315,11 +36310,12 @@ SessionCipher.prototype = {
         var commitKey = plaintext.slice(0, Internal.crypto.signKeyLength);
         var macKey = plaintext.slice(Internal.crypto.signKeyLength, Internal.crypto.signKeyLength*2);
         plaintext = plaintext.slice(Internal.crypto.signKeyLength*2);
-        
+
         var macInput = new Uint8Array(messageProto.byteLength + 33*2 + 1);
         macInput.set(new Uint8Array(util.toArrayBuffer(session.indexInfo.remoteIdentityKey)));
         macInput.set(new Uint8Array(util.toArrayBuffer(ourIdentityKey.pubKey)), 33);
         macInput[33*2] = (3 << 4) | 3;
+        
         macInput.set(new Uint8Array(messageProto), 33*2 + 1);
         return Promise.all([
             plaintext, 
